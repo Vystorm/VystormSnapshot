@@ -1,0 +1,287 @@
+# Русский — UTF-8. Keep keys, placeholders and formatting tokens unchanged.
+photo-caption: '<gray>Подпись: '
+album-caption-hint: '<gray>Держите отпечаток: /snapshot caption TEXT'
+caption-missing: <gray>Держите одну из ваших фотографий в главной руке.
+caption-not-owner: <gray>Изменить эту подпись может только фотограф.
+caption-invalid: <gray>Используйте не более {max} символов без кодов управления или форматирования.
+caption-unavailable: <gray>Альбом не удалось спасти. Ваша подпись не изменилась.
+caption-saved: <gray>Запись сохранена для всей фотографии. Будущие принты включают его.
+caption-cleared: <gray>Запись удалена со всей фотографии.
+album-title-world: 'Альбом: {world} ({count}) · {page}/{pages}'
+camera-name: <gold>Камера
+camera-lore-left: <gray>Левый клик, чтобы сделать фотографию (использует бумагу 1)
+camera-lore-right: <gray>Щелкните правой кнопкой мыши, чтобы сделать фотографию (используется бумага 1)
+photo-name: <gold>Фотография
+photo-lore: <gray>📷 {player} · {world} · {date}
+developing: <gray>Развитие ...
+done: <green>Ваша фотография готова.
+cooldown: <red>Камера все еще извивается ({seconds} с).
+busy: <red>Слишком много фотографий развивается прямо сейчас, попробуйте еще раз.
+no-film: <red>Вам нужно {film}, чтобы сделать фотографию.
+denied: <red>У вас нет на это разрешения.
+reloaded: <green>Vystorm Снимок перезагружен.
+unknown-player: <red>Игрок не найден.
+given: <green>Камера предоставлена {player}.
+usage-capture: <gray>/snapshot capture WORLD X Y Z YAW PITCH
+unknown-world: '<red>Неизвестный мир: {world} <gray>Нажмите Tab, чтобы увидеть допустимые значения.'
+captured: '<green>Фото готово: ID карты {ids}. Файлы: photos/ID.Пн. Первая печать: /give @p full_map[map_id={id}]'
+photo-name-part: <gold>Фотография <gray>({part})
+photo-where: <dark_gray>{where}
+done-big: '<green>Ваша фотография {format} готова: {maps} карты, повесьте их рядом.'
+hold-camera: <red>Держите камеру в главной руке.
+usage-format: '<gray>/snapshot format FORMAT – доступный: {formats}'
+format-set: <green>Камера установлена на {format} ({maps} карты и столько же бумаги на фото).
+album-title: Альбом ({count})
+album-reprint: <yellow>Левый клик для перепечатки (1 бумаг)
+album-title-page: Альбом ({count}) · страница {page}/{pages}
+album-reprint-all: <yellow>Shift-click для перепечатки всей картины ({maps})
+album-previous: <yellow>« Страница {page}
+album-next: <yellow>Страница {page} »
+camera-lore-settings: '<gray>Фильм: <white>{style}</white> · {format} · <white>{frame}'
+camera-lore-menu: '<dark_gray>Своп-ключ (F): меню камеры'
+camera-lore-sneak-menu: '<dark_gray>Sneak + правый клик: меню камеры'
+camera-lore-timer: '<gray>Самостоятельный таймер: <white>{seconds} с'
+camera-menu-timer: <yellow>Самостоятельный таймер {seconds} с <gray>(Перейти к картине)
+camera-menu-timer-off: <yellow>Нет таймера
+timer-countdown: '<gold>- Самостоятельный таймер: <yellow>{seconds}</yellow> …'
+timer-running: <gray>Самовремя уже работает.
+camera-menu-title: Камера
+camera-menu-format: <yellow>Формат {format} <gray>({maps} карт)
+camera-menu-album: <yellow>Альбом
+camera-menu-gallery: <yellow>Галерея
+style-color: <yellow>цвет
+style-black-white: <yellow>Черный и белый
+style-sepia: <yellow>Сепия
+style-vintage: <yellow>винтажный
+style-noir: <yellow>Нуар
+style-vivid: <yellow>Яркий
+frame-none: <yellow>Без рамы
+frame-white: <yellow>Белый каркас
+frame-black: <yellow>Черный кадр
+album-publish: <aqua>Правый клик, чтобы показать его в галерее
+album-published: <light_purple>В галерее · ? {likes} <gray>(прямой клик, чтобы снять его)
+gallery-title: Галерея ({count}) · {page}/{pages}
+gallery-title-player: Фотографии {player} ({count}) · {page}/{pages}
+gallery-likes: <red>❤ <gray>{likes}
+gallery-likes-yours: <red>❤ <gray>{likes} (понравилось)
+gallery-like: <yellow>Кликните, чтобы понравиться
+gallery-unlike: <yellow>Click to take your like скачать
+gallery-print: <yellow>Shift-click для печати ({maps})
+gallery-remove: <red>Shift-right-click скачать
+gallery-sort-new: <yellow>Первый новый
+gallery-sort-top: <yellow>Сначала понравилось
+gallery-sort-hint: <gray>Нажмите, чтобы переключиться
+gallery-published: <green>Ваша фотография сейчас выставлена в галерее.
+gallery-taken-down: <gray>Фотография снята с галереи.
+gallery-full: <red>Вы уже показываете {max} фотографий, сначала сделайте одну.
+gallery-liked-by: <red>❤ <gray>{player} нравится ваше фото.
+gallery-own: <gray>Это ваша собственная фотография.
+gallery-broken: <red>Фотогалерея сейчас закрыта на техническое обслуживание.
+gallery-broken-admin: '<red>Фотогалерея выключена: gallery.yml не могли быть прочитаны и хранились как фотографии/{file}.
+  Исправьте его, переименуйте обратно в gallery.yml и перезапустите.'
+menu-album: Фотоальбом
+menu-album-desc: 'Ваши фотографии: перепечатайте их или поместите в галерею'
+menu-gallery: Фотогалерея
+menu-gallery-desc: Фотографии всех игроков, самые новые или самые любимые
+menu-photos: <yellow>Фотографии {player}
+menu-photos-lore: <gray>{count} фотографий в галерее
+commands:
+  snapshot:
+    description: 'Фотокамеры: альбом, меню камеры, галерея и формат фото'
+    aliases: []
+    sub:
+      albums:
+        name: albums
+        aliases: []
+        description: "Создавайте личные альбомы и делитесь ими с выбранными игроками."
+        args:
+          action: ACTION
+      search:
+        name: search
+        aliases: []
+        description: Поиск подписей в вашем собственном альбоме
+        args:
+          text: TEXT
+      album:
+        name: album
+        aliases: []
+        description: Откройте свой фотоальбом, необязательно отфильтрованный миром
+        args:
+          world: WORLD
+      contest:
+        name: contest
+        aliases: []
+        description: "Фотоконкурс: голосовать и участвовать"
+        sub:
+          start:
+            name: start
+            aliases: []
+            description: "Начать фотоконкурс"
+            args:
+              hours: HOURS
+              theme: THEME
+          end:
+            name: end
+            aliases: []
+            description: "Завершить фотоконкурс сейчас"
+      camera:
+        name: camera
+        aliases: []
+        description: Стиль фильма, формат и кадр камеры в руке
+      gallery:
+        name: gallery
+        aliases: []
+        description: Фотографии, которые все ставят на шоу, или фотографии одного игрока
+        args:
+          player: PLAYER
+      format:
+        name: format
+        aliases: []
+        description: Формат фотокамеры в руке (e.g). 2x1)
+        args:
+          format: WxH
+      postcard:
+        name: postcard
+        aliases: []
+        description: "Отправить копию фото в руке с приветом"
+        args:
+          player: PLAYER
+          text: TEXT
+      postcards:
+        name: postcards
+        aliases: []
+        description: "Забрать ожидающие открытки"
+      caption:
+        name: caption
+        aliases: []
+        description: Установите подпись к вашей фотографии; опустите текст, чтобы очистить его
+        args:
+          text: TEXT
+      give:
+        name: give
+        aliases: []
+        description: Дайте камеру себе или игроку
+        args:
+          player: PLAYER
+      capture:
+        name: capture
+        aliases: []
+        description: Сфотографируйтесь с любой позиции, e.g. для нерестовых досок
+        args:
+          world: WORLD
+          x: XX
+          y: Y
+          z: Z
+          yaw: YAW
+          pitch: PITCH
+          format: WxH
+      reload:
+        name: reload
+        aliases: []
+        description: Перезагрузка конфигурационных и языковых файлов
+album-title-search: '<gold>Поиск: {count} карт ({page}/{pages})'
+capture-unloaded: <red>чанк камеры не загружается. Посетите место, прежде чем сделать консольную фотографию.
+
+# Free feature release: collections
+collections:
+  title: "Фотоальбомы"
+  description: "Создавайте личные альбомы и делитесь ими с выбранными игроками."
+  create: "Создать альбом"
+  name-prompt: "Имя: 1–24 латинские буквы, цифры, _ или -"
+  title-prompt: "Название (до 64 символов)"
+  player-prompt: "Игрок, которому открыть альбом"
+  summary: "{name} · фото: {count}"
+  previous: "Предыдущая страница"
+  next: "Следующая страница"
+  back: "К альбомам"
+  add-held: "Добавить фото из основной руки"
+  rename: "Изменить название"
+  sharing: "Управление доступом"
+  share: "Открыть доступ игроку"
+  revoke: "Нажмите, чтобы немедленно отозвать доступ"
+  delete: "Удалить альбом"
+  delete-confirm: "Удалить альбом и разрешения? Оригиналы и уже выданные копии сохранятся."
+  photo-owner: "Нажать: распечатать всё фото. Shift-клик: убрать из альбома."
+  photo-reader: "Нажмите, чтобы распечатать всё фото за свою бумагу."
+  result-saved: "<green>Альбом сохранён."
+  result-missing: "<red>Альбом или фото не найдены."
+  result-denied: "<red>Нет доступа к этому альбому или фото."
+  result-invalid: "<red>Неверное или повторяющееся имя, название или фото. Используйте своё фото."
+  result-limit: "<red>Лимит: 20 альбомов, 200 фото в каждом, доступ для 32 игроков."
+  result-unavailable: "<red>Хранилище недоступно. Изменения не сохранены."
+  usage: "/snapshot albums [create ИМЯ | open ИМЯ | add ИМЯ | title ИМЯ ТЕКСТ | share ИМЯ ИГРОК | unshare ИМЯ ИГРОК | delete ИМЯ]"
+postcard:
+  disabled: "<gray>Открытки на этом сервере отключены."
+  no-photo: "<red>Возьмите фото в руку, чтобы отправить его открыткой."
+  unknown: "<red>{player} никогда не был на этом сервере."
+  self: "<red>Отправляйте открытки другим игрокам."
+  too-long: "<red>Привет может быть не длиннее {max} символов."
+  limit: "<red>Можно отправить {max} открыток в день."
+  mailbox-full: "<red>Почтовый ящик {player} переполнен."
+  sent: "<green>✉ Открытка отправлена {player}."
+  waiting: "<gold>✉ Ждут открыток: {count} – освободите место и используйте /snapshot postcards."
+  inbox: "Вам пришла открытка от {player}. Её вручат при входе; /snapshot postcards забирает её."
+  none: "<gray>Открыток для вас нет."
+  inventory-full: "<gold>✉ Ещё ждут открыток: {count} – освободите место и используйте /snapshot postcards."
+  lore: "<gold>✉ Открытка от {player}"
+  received: "<gold>✉ Открытка от {player}!"
+  received-text: "<gold>✉ Открытка от {player}: <gray>«{text}»"
+contest:
+  title: "Конкурс: {theme} (ещё {time})"
+  entry-by: "<gray>автор {player} · <gold>голосов: {votes}"
+  entry-vote: "<green>Клик: проголосовать"
+  entry-unvote: "<yellow>Клик: отозвать голос"
+  entry-own: "<gray>Ваша работа"
+  enter-button: "<gold>Подать фото"
+  enter-hint: "<gray>Выберите одно из ваших фото в галерее"
+  picker-title: "Выберите фото для конкурса"
+  back: "<gray>Назад"
+  enter-ok: "<green>Ваше фото участвует в конкурсе."
+  enter-closed: "<red>Конкурс завершён."
+  enter-taken: "<red>Это фото уже участвует."
+  vote-unvoted: "<yellow>Голос отозван."
+  vote-own: "<gray>Нельзя голосовать за своё фото."
+  vote-missing: "<red>Это фото больше не участвует."
+  vote-closed: "<red>Конкурс завершён."
+  none: "<gray>Сейчас нет фотоконкурса."
+  none-last: "<gray>Сейчас конкурса нет. Последний победитель ({theme}): <gold>{player}</gold>, голосов: {votes}."
+  no-photos: "<gray>Сначала выставите фото в галерее (ПКМ в альбоме)."
+  disabled: "<gray>Фотоконкурсы на этом сервере отключены."
+  start-usage: "<gray>/snapshot contest start ЧАСЫ ТЕМА (от 0,25 до 336 часов, тема до 48 символов)"
+  already: "<red>Конкурс уже идёт."
+  started: "<gold>📸 Фотоконкурс начат: «{theme}» – {time}. Участвуйте и голосуйте: /snapshot contest!"
+  winner: "<gold>📸 Конкурс «{theme}» выиграл {player}, голосов: {votes}!"
+  ended-empty: "<gray>📸 Конкурс «{theme}» завершился без работ."
+  news-title: "Фотоконкурс: {theme}"
+  news-text: "Победил {player}, голосов: {votes}. Поздравляем!"
+  won-inbox: "Вы выиграли фотоконкурс «{theme}», голосов: {votes}!"
+
+# Core Panels
+panel:
+  browse: "Выберите запись, чтобы увидеть сведения и действия."
+  empty: "Нет записей для отображения."
+  search: "Поиск по подписям"
+  page: "Страница {page}/{pages}"
+  style: "Стиль плёнки"
+  format: "Формат"
+  frame: "Рамка"
+  timer: "Автоспуск"
+  print: "Напечатать эту карту"
+  print-all: "Напечатать всё фото"
+  publish: "Опубликовать в галерее"
+  unpublish: "Убрать из галереи"
+  like: "Нравится"
+  unlike: "Убрать отметку"
+  vote: "Голосовать"
+  unvote: "Забрать голос"
+  photos: "Фотографии"
+  open: "Открыть альбом"
+  revoke: "Отозвать доступ"
+  remove-photo: "Удалить из альбома"
+  photographer: "Фотограф"
+  world: "Мир"
+  date: "Дата"
+  location: "Место"
+  maps: "Карты"
+  confirm: "Выполнить это действие?"
+  print-confirm: "Напечатать это фото? Плёнка расходуется как обычно (бесплатно в творческом режиме)."

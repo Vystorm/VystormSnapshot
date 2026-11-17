@@ -1,0 +1,290 @@
+photo-caption: "<gray>Caption: "
+album-caption-hint: "<gray>Hold a print: /snapshot caption TEXT"
+caption-missing: "<gray>Hold one of your Snapshot photos in your main hand."
+caption-not-owner: "<gray>Only the photographer can change this caption."
+caption-invalid: "<gray>Use at most {max} characters, without control or formatting codes."
+caption-unavailable: "<gray>The album could not be saved. Your caption was not changed."
+caption-saved: "<gray>Caption saved for the whole photo. Future prints include it."
+caption-cleared: "<gray>Caption removed from the whole photo."
+album-title-world: "Album: {world} ({count}) · {page}/{pages}"
+camera-name: "<gold>Camera"
+camera-lore-left: "<gray>Left-click to take a photo (uses 1 paper)"
+camera-lore-right: "<gray>Right-click to take a photo (uses 1 paper)"
+photo-name: "<gold>Photo"
+photo-lore: "<gray>📷 {player} · {world} · {date}"
+developing: "<gray>📷 Developing …"
+done: "<green>📷 Your photo is ready."
+cooldown: "<red>The camera is still winding ({seconds} s)."
+busy: "<red>Too many photos are developing right now, try again in a moment."
+no-film: "<red>You need {film} to take a photo."
+denied: "<red>You lack permission for this."
+reloaded: "<green>Vystorm Snapshot reloaded."
+unknown-player: "<red>Player not found."
+given: "<green>Camera given to {player}."
+usage-capture: "<gray>/snapshot capture WORLD X Y Z YAW PITCH"
+unknown-world: "<red>Unknown world: {world} <gray>Press Tab to see valid values."
+captured: "<green>Photo ready: map IDs {ids}. Files: photos/ID.png. First print: /give @p filled_map[map_id={id}]"
+photo-name-part: "<gold>Photo <gray>({part})"
+photo-where: "<dark_gray>{where}"
+done-big: "<green>📷 Your {format} photo is ready: {maps} maps, hang them side by side."
+hold-camera: "<red>Hold your camera in your main hand."
+usage-format: "<gray>/snapshot format FORMAT – available: {formats}"
+format-set: "<green>Camera set to {format} ({maps} maps and as much paper per photo)."
+album-title: "Album ({count})"
+album-reprint: "<yellow>Left-click to reprint (1 paper)"
+album-title-page: "Album ({count}) · page {page}/{pages}"
+album-reprint-all: "<yellow>Shift-click to reprint the whole picture ({maps} paper)"
+album-previous: "<yellow>« Page {page}"
+album-next: "<yellow>Page {page} »"
+camera-lore-settings: "<gray>Film: <white>{style}</white> · {format} · <white>{frame}"
+camera-lore-menu: "<dark_gray>Swap-hand key (F): camera menu"
+camera-lore-sneak-menu: "<dark_gray>Sneak + right-click: camera menu"
+camera-lore-timer: "<gray>Self-timer: <white>{seconds} s"
+camera-menu-timer: "<yellow>Self-timer {seconds} s <gray>(step into the picture)"
+camera-menu-timer-off: "<yellow>No self-timer"
+timer-countdown: "<gold>📷 Self-timer: <yellow>{seconds}</yellow> …"
+timer-running: "<gray>The self-timer is already running."
+camera-menu-title: "Camera"
+camera-menu-format: "<yellow>Format {format} <gray>({maps} maps)"
+camera-menu-album: "<yellow>Album"
+camera-menu-gallery: "<yellow>Gallery"
+style-color: "<yellow>Color"
+style-black-white: "<yellow>Black & white"
+style-sepia: "<yellow>Sepia"
+style-vintage: "<yellow>Vintage"
+style-noir: "<yellow>Noir"
+style-vivid: "<yellow>Vivid"
+frame-none: "<yellow>No frame"
+frame-white: "<yellow>White frame"
+frame-black: "<yellow>Black frame"
+album-publish: "<aqua>Right-click to show it in the gallery"
+album-published: "<light_purple>In the gallery · ❤ {likes} <gray>(right-click to take it down)"
+gallery-title: "Gallery ({count}) · {page}/{pages}"
+gallery-title-player: "Photos by {player} ({count}) · {page}/{pages}"
+gallery-likes: "<red>❤ <gray>{likes}"
+gallery-likes-yours: "<red>❤ <gray>{likes} (you like it)"
+gallery-like: "<yellow>Click to like"
+gallery-unlike: "<yellow>Click to take your like back"
+gallery-print: "<yellow>Shift-click for a print ({maps} paper)"
+gallery-remove: "<red>Shift-right-click to take it down"
+gallery-sort-new: "<yellow>Newest first"
+gallery-sort-top: "<yellow>Most liked first"
+gallery-sort-hint: "<gray>Click to switch"
+gallery-published: "<green>Your photo is now on show in the gallery."
+gallery-taken-down: "<gray>Photo taken down from the gallery."
+gallery-full: "<red>You already show {max} photos, take one down first."
+gallery-liked-by: "<red>❤ <gray>{player} likes your photo."
+gallery-own: "<gray>That is your own photo."
+gallery-broken: "<red>The photo gallery is closed for maintenance right now."
+gallery-broken-admin: "<red>The photo gallery is off: gallery.yml could not be read and was kept as photos/{file}. Fix it, rename it back to gallery.yml and restart."
+menu-album: "Photo album"
+menu-album-desc: "Your photos: reprint them or put them in the gallery"
+menu-gallery: "Photo gallery"
+menu-gallery-desc: "The photos of all players, newest or most liked first"
+menu-photos: "<yellow>Photos by {player}"
+menu-photos-lore: "<gray>{count} photos in the gallery"
+
+# /snapshot through Vystorm Core: description, help and tab completion per player. "aliases" under commands.snapshot are
+# extra root commands (server-wide, the admin chooses which languages: Core config commands.localized-aliases); "name"
+# and "aliases" of a subcommand are accepted in every language, English always works.
+commands:
+  snapshot:
+    description: "Camera photos: album, camera menu, gallery and photo format"
+    aliases: []
+    sub:
+      albums:
+        name: albums
+        aliases: []
+        description: "Create private albums and share them with selected players."
+        args:
+          action: ACTION
+      search:
+        name: search
+        aliases: []
+        description: "Search captions in your own album"
+        args:
+          text: TEXT
+      album:
+        name: album
+        aliases: []
+        description: "Open your photo album, optionally filtered by world"
+        args:
+          world: WORLD
+      contest:
+        name: contest
+        aliases: []
+        description: "Photo contest: vote and enter a photo"
+        sub:
+          start:
+            name: start
+            aliases: []
+            description: "Start a photo contest"
+            args:
+              hours: HOURS
+              theme: THEME
+          end:
+            name: end
+            aliases: []
+            description: "End the photo contest now"
+      camera:
+        name: camera
+        aliases: []
+        description: "Film style, format and frame of the camera in your hand"
+      gallery:
+        name: gallery
+        aliases: []
+        description: "Photos everyone put on show, or those of one player"
+        args:
+          player: PLAYER
+      format:
+        name: format
+        aliases: []
+        description: "Photo format of the camera in your hand (e.g. 2x1)"
+        args:
+          format: WxH
+      postcard:
+        name: postcard
+        aliases: []
+        description: "Send a copy of the held photo with a greeting"
+        args:
+          player: PLAYER
+          text: TEXT
+      postcards:
+        name: postcards
+        aliases: []
+        description: "Collect postcards waiting for you"
+      caption:
+        name: caption
+        aliases: []
+        description: "Set a caption for your held photo; omit text to clear it"
+        args:
+          text: TEXT
+      give:
+        name: give
+        aliases: []
+        description: "Give a camera to yourself or a player"
+        args:
+          player: PLAYER
+      capture:
+        name: capture
+        aliases: []
+        description: "Take a photo from any position, e.g. for spawn boards"
+        args:
+          world: WORLD
+          x: X
+          "y": "Y"
+          z: Z
+          yaw: YAW
+          pitch: PITCH
+          format: WxH
+      reload:
+        name: reload
+        aliases: []
+        description: "Reload config and language files"
+
+album-title-search: "<gold>Search: {count} maps ({page}/{pages})"
+capture-unloaded: "<red>The camera chunk is not loaded. Visit the location before taking a console photo."
+
+# Free feature release: collections
+collections:
+  title: "Photo albums"
+  description: "Create private albums and share them with selected players."
+  create: "Create album"
+  name-prompt: "Album name: 1–24 letters, numbers, _ or -"
+  title-prompt: "Album title (up to 64 characters)"
+  player-prompt: "Player to share this album with"
+  summary: "{name} · {count} photos"
+  previous: "Previous page"
+  next: "Next page"
+  back: "Back to albums"
+  add-held: "Add the photo in your main hand"
+  rename: "Edit album title"
+  sharing: "Manage sharing"
+  share: "Share with a player"
+  revoke: "Click to revoke access immediately"
+  delete: "Delete album"
+  delete-confirm: "Delete this album and its sharing permissions? Original photos and existing prints are kept."
+  photo-owner: "Click: print the full photo. Shift-click: remove from this album."
+  photo-reader: "Click to print the full photo using your paper."
+  result-saved: "<green>Album saved."
+  result-missing: "<red>Album or photo not found."
+  result-denied: "<red>You do not have access to this album or photo."
+  result-invalid: "<red>Invalid or duplicate name, title or photo. Use a photo you took."
+  result-limit: "<red>Limit reached: 20 albums, 200 photos per album, 32 shared players."
+  result-unavailable: "<red>Album storage is unavailable. No change was saved."
+  usage: "/snapshot albums [create NAME | open NAME | add NAME | title NAME TEXT | share NAME PLAYER | unshare NAME PLAYER | delete NAME]"
+postcard:
+  disabled: "<gray>Postcards are switched off on this server."
+  no-photo: "<red>Hold a photo to send it as a postcard."
+  unknown: "<red>{player} has never been on this server."
+  self: "<red>Send postcards to other players."
+  too-long: "<red>The greeting can be at most {max} characters."
+  limit: "<red>You can send {max} postcards per day."
+  mailbox-full: "<red>{player}'s mailbox is full."
+  sent: "<green>✉ Postcard sent to {player}."
+  waiting: "<gold>✉ You have {count} postcard(s) waiting – make room and use /snapshot postcards."
+  inbox: "You got a postcard from {player}. It is handed over when you join; /snapshot postcards collects it."
+  none: "<gray>No postcards are waiting for you."
+  inventory-full: "<gold>✉ {count} postcard(s) still wait – make room and use /snapshot postcards."
+  lore: "<gold>✉ Postcard from {player}"
+  received: "<gold>✉ A postcard from {player}!"
+  received-text: "<gold>✉ A postcard from {player}: <gray>„{text}“"
+contest:
+  title: "Contest: {theme} ({time} left)"
+  entry-by: "<gray>by {player} · <gold>{votes} vote(s)"
+  entry-vote: "<green>Click: vote"
+  entry-unvote: "<yellow>Click: take your vote back"
+  entry-own: "<gray>Your entry"
+  enter-button: "<gold>Enter a photo"
+  enter-hint: "<gray>Choose one of your gallery photos"
+  picker-title: "Choose your entry"
+  back: "<gray>Back"
+  enter-ok: "<green>Your photo is in the contest."
+  enter-closed: "<red>The contest is closed."
+  enter-taken: "<red>That photo is already entered."
+  vote-unvoted: "<yellow>Vote taken back."
+  vote-own: "<gray>You cannot vote for your own photo."
+  vote-missing: "<red>That photo is no longer in the contest."
+  vote-closed: "<red>The contest is closed."
+  none: "<gray>There is no photo contest right now."
+  none-last: "<gray>No contest right now. Last winner ({theme}): <gold>{player}</gold> with {votes} vote(s)."
+  no-photos: "<gray>Put a photo on show in the gallery first (right-click it in your album)."
+  disabled: "<gray>Photo contests are switched off on this server."
+  start-usage: "<gray>/snapshot contest start HOURS THEME (0.25 to 336 hours, theme up to 48 characters)"
+  already: "<red>A contest is already running."
+  started: "<gold>📸 Photo contest started: \"{theme}\" – {time}. Enter and vote with /snapshot contest!"
+  winner: "<gold>📸 Contest \"{theme}\" won by {player} with {votes} vote(s)!"
+  ended-empty: "<gray>📸 Contest \"{theme}\" ended without entries."
+  news-title: "Photo contest: {theme}"
+  news-text: "{player} won with {votes} vote(s). Congratulations!"
+  won-inbox: "You won the photo contest \"{theme}\" with {votes} vote(s)!"
+
+# Core Panels
+panel:
+  browse: "Select an entry to see details and actions."
+  empty: "No entries to show."
+  search: "Search captions"
+  page: "Page {page}/{pages}"
+  style: "Film style"
+  format: "Format"
+  frame: "Frame"
+  timer: "Self-timer"
+  print: "Print this map"
+  print-all: "Print whole photo"
+  publish: "Publish to gallery"
+  unpublish: "Take down from gallery"
+  like: "Like"
+  unlike: "Remove like"
+  vote: "Vote"
+  unvote: "Withdraw vote"
+  photos: "Photos"
+  open: "Open album"
+  revoke: "Revoke access"
+  remove-photo: "Remove from album"
+  photographer: "Photographer"
+  world: "World"
+  date: "Date"
+  location: "Location"
+  maps: "Maps"
+  confirm: "Continue with this action?"
+  print-confirm: "Print this photo? The usual film cost applies (free in Creative)."

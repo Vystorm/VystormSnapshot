@@ -1,0 +1,24 @@
+name: VystormSnapshot
+version: '${version}'
+main: at.esoren.vystormsnapshot.SnapshotPlugin
+api-version: '1.20.6'
+author: Esoren
+depend: [vystorm_core]
+website: https://vystorm.net
+description: A craftable camera that turns what you see into a map photo.
+permissions:
+  vystormsnapshot.postcard:
+    description: Send photos as postcards and collect received ones (/snapshot postcard, /snapshot postcards)
+    default: true
+  vystormsnapshot.use:
+    description: Take photos with a camera.
+    default: true
+  vystormsnapshot.admin:
+    description: Give cameras and reload the configuration.
+    default: op
+  vystormsnapshot.gallery:
+    description: Browse the photo gallery, like photos and put own photos on show.
+    default: true
+  vystormsnapshot.gallery.moderate:
+    description: Take any photo down from the gallery.
+    default: op

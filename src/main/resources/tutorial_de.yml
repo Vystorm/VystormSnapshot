@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Foto machen'
+    text: |
+      Halte eine Kamera und mach mit Rechtsklick ein Foto von dem, was du siehst. Es wird eine Karte, die du in einen Rahmen hängen kannst.
+  - title: 'Album und Galerie'
+    text: |
+      /snapshot öffnet dein Album. Stelle Fotos in der Galerie aus oder teile private Alben mit Freunden.
+  - title: 'Kamera einstellen'
+    text: |
+      /snapshot camera stellt Filmstil und Rahmen ein; /snapshot format 2x1 macht breite Fotos; /snapshot caption setzt einen Titel.
+      Mit /snapshot help siehst du alle Befehle.

@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Scattare una foto'
+    text: |
+      Tieni una fotocamera e fai clic destro per fotografare ciò che vedi. Diventa una mappa da appendere.
+  - title: 'Album e galleria'
+    text: |
+      /snapshot apre il tuo album. Esponi foto nella galleria o condividi album privati.
+  - title: 'Impostazioni fotocamera'
+    text: |
+      /snapshot camera imposta stile e cornice; /snapshot format 2x1 fa foto larghe; /snapshot caption aggiunge un titolo.
+      Scrivi /snapshot help per vedere tutti i comandi.

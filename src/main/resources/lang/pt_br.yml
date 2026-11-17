@@ -1,0 +1,287 @@
+# Português (Brasil) — UTF-8. Keep keys, placeholders and formatting tokens unchanged.
+photo-caption: '<gray>Legenda: '
+album-caption-hint: '<gray>Segure uma impressão: /snapshot caption TEXT'
+caption-missing: <gray>Segure uma de suas fotos na mão principal.
+caption-not-owner: <gray>Só o fotógrafo pode mudar essa legenda.
+caption-invalid: <gray>Use no máximo {max} caracteres, sem códigos de controle ou formatação.
+caption-unavailable: <gray>O álbum não pôde ser salvo. Sua legenda não foi mudada.
+caption-saved: <gray>Legenda salva para a foto inteira. Impressões futuras incluem.
+caption-cleared: <gray>A legenda foi retirada da foto inteira.
+album-title-world: 'Álbum: {world} ({count}) · {page}/{pages}'
+camera-name: <gold>Câmera
+camera-lore-left: <gray>Clique com o botão esquerdo para tirar uma foto (usa 1 papel)
+camera-lore-right: <gray>Clique com o botão direito para tirar uma foto (usa 1 papel)
+photo-name: <gold>Foto
+photo-lore: <gray>📷 {player} · {world} · {date}
+developing: <gray>"Desenvolvendo..."
+done: <green>Sua foto está pronta.
+cooldown: <red>A câmera ainda está rodando ({seconds} s).
+busy: <red>Muitas fotos estão se desenvolvendo agora, tente novamente em um momento.
+no-film: <red>Você precisa de {film} para tirar uma foto.
+denied: <red>Você não tem permissão para isso.
+reloaded: <green>Vystorm instantâneos recarregados.
+unknown-player: <red>Jogador não encontrado.
+given: <green>Câmera dada a {player}.
+usage-capture: <gray>/snapshot capture WORLD X Y Z YAW PITCH
+unknown-world: '<red>Mundo desconhecido: {world} <gray>Pressione Tab para ver os valores válidos.'
+captured: '<green>Foto pronta: identificação do mapa {ids}. Arquivos: photos/ID.Png. Primeira impressão: /give @''P fill_map''[map_id={id}]'
+photo-name-part: <gold>Foto <gray>({part})
+photo-where: <dark_gray>{where}
+done-big: '<green>Sua foto {format} está pronta: {maps} mapas, pendure-os lado a lado.'
+hold-camera: <red>Segure sua câmera na mão principal.
+usage-format: '<gray>/snapshot format FORMAT – disponível: {formats}'
+format-set: <green>Câmera configurada para {format} ({maps} mapas e tanto papel por foto).
+album-title: Álbum ({count})
+album-reprint: <yellow>Clique com o botão esquerdo para reimprimir (1 papel)
+album-title-page: Álbum ({count}) · Página {page}/{pages}
+album-reprint-all: <yellow>Shift-clique para reimprimir a imagem inteira ({maps} papel)
+album-previous: <yellow>« Página {page}
+album-next: <yellow>Página {page} »
+camera-lore-settings: '<gray>Filme: <white>{style}</white> · {format} · <white>{frame}'
+camera-lore-menu: '<dark_gray>Chave de troca de mão (F): menu da câmera'
+camera-lore-sneak-menu: '<dark_gray>Sneak + botão direito: menu da câmera'
+camera-lore-timer: '<gray>Auto-temporizador: <white>{seconds} s'
+camera-menu-timer: <yellow>Auto-temporizador {seconds} s <gray>(Passar na foto)
+camera-menu-timer-off: <yellow>Sem tempo livre
+timer-countdown: '<gold>Temporizador: <yellow>{seconds}</yellow> …'
+timer-running: <gray>O temporizador já está funcionando.
+camera-menu-title: Câmera
+camera-menu-format: <yellow>Formato {format} <gray>({maps} mapas)
+camera-menu-album: <yellow>Álbum
+camera-menu-gallery: <yellow>Galeria
+style-color: <yellow>Cor
+style-black-white: <yellow>Preto e branco
+style-sepia: <yellow>Sepia
+style-vintage: <yellow>Vintage
+style-noir: <yellow>Noir
+style-vivid: <yellow>Vivid
+frame-none: <yellow>Sem moldura
+frame-white: <yellow>Quadro branco
+frame-black: <yellow>Quadro preto
+album-publish: <aqua>Clique com o botão direito para mostrar na galeria
+album-published: <light_purple>Na galeria, {likes} <gray>(clique direito para derrubá-lo)
+gallery-title: Galeria ({count}) · {page}/{pages}
+gallery-title-player: Fotos de {player} ({count}) · {page}/{pages}
+gallery-likes: <red>❤ <gray>{likes}
+gallery-likes-yours: <red>❤ <gray>{likes} (você gosta)
+gallery-like: <yellow>Clique para gostar
+gallery-unlike: <yellow>Clique para voltar atrás
+gallery-print: <yellow>Shift-clique para uma impressão ({maps} papel)
+gallery-remove: <red>Shift-right-click para derrubá-lo
+gallery-sort-new: <yellow>O mais novo primeiro
+gallery-sort-top: <yellow>A maioria gostou primeiro
+gallery-sort-hint: <gray>Clique para mudar
+gallery-published: <green>Sua foto está agora na galeria.
+gallery-taken-down: <gray>Foto tirada da galeria.
+gallery-full: <red>Você já mostra {max} fotos, tire uma primeiro.
+gallery-liked-by: <red>❤ <gray>{player} gosta da sua foto.
+gallery-own: <gray>Essa é sua própria foto.
+gallery-broken: <red>A galeria de fotos está fechada para manutenção.
+gallery-broken-admin: '<red>A galeria de fotos está desligada: gallery.yml não puderam ser lidos e foram mantidos como fotos/{file}.
+  Conserte, mude o nome para gallery.yml e reinicie.'
+menu-album: Álbum de fotos
+menu-album-desc: 'Suas fotos: reimprimi-las ou colocá-las na galeria'
+menu-gallery: Galeria de fotos
+menu-gallery-desc: As fotos de todos os jogadores, mais recentes ou mais gostaram primeiro
+menu-photos: <yellow>Fotos por {player}
+menu-photos-lore: <gray>{count} fotos na galeria
+commands:
+  snapshot:
+    description: 'Fotos da câmera: álbum, menu da câmera, galeria e formato de foto'
+    aliases: []
+    sub:
+      albums:
+        name: albums
+        aliases: []
+        description: "Crie álbuns privados e compartilhe com jogadores escolhidos."
+        args:
+          action: ACTION
+      search:
+        name: search
+        aliases: []
+        description: Procure legendas em seu próprio álbum
+        args:
+          text: TEXT
+      album:
+        name: album
+        aliases: []
+        description: Abra seu álbum de fotos, opcionalmente filtrado pelo mundo
+        args:
+          world: WORLD
+      contest:
+        name: contest
+        aliases: []
+        description: "Concurso de fotos: votar e participar"
+        sub:
+          start:
+            name: start
+            aliases: []
+            description: "Iniciar um concurso de fotos"
+            args:
+              hours: HOURS
+              theme: THEME
+          end:
+            name: end
+            aliases: []
+            description: "Encerrar o concurso agora"
+      camera:
+        name: camera
+        aliases: []
+        description: Estilo, formato e moldura da câmera em sua mão
+      gallery:
+        name: gallery
+        aliases: []
+        description: Fotos que todo mundo colocar em show, ou as de um jogador
+        args:
+          player: PLAYER
+      format:
+        name: format
+        aliases: []
+        description: Formato de foto da câmera em sua mão (e.g. 2x1)
+        args:
+          format: WxH
+      postcard:
+        name: postcard
+        aliases: []
+        description: "Enviar uma cópia da foto na mão com uma saudação"
+        args:
+          player: PLAYER
+          text: TEXT
+      postcards:
+        name: postcards
+        aliases: []
+        description: "Pegar os cartões-postais esperando por você"
+      caption:
+        name: caption
+        aliases: []
+        description: Defina uma legenda para sua foto. Omitir texto para clareá-la
+        args:
+          text: TEXT
+      give:
+        name: give
+        aliases: []
+        description: Dê uma câmera para você ou um jogador
+        args:
+          player: PLAYER
+      capture:
+        name: capture
+        aliases: []
+        description: Tire uma foto de qualquer posição, e.g
+        args:
+          world: WORLD
+          x: X
+          y: Y
+          z: Z
+          yaw: YAW
+          pitch: PITCH
+          format: WxH
+      reload:
+        name: reload
+        aliases: []
+        description: Recarregar arquivos de configuração e linguagem
+album-title-search: '<gold>Pesquisa: {count} mapas ({page}/{pages})'
+capture-unloaded: <red>O pedaço da câmera não está carregado. Visite o local antes de tirar uma foto do console.
+
+# Free feature release: collections
+collections:
+  title: "Álbuns de fotos"
+  description: "Crie álbuns privados e compartilhe com jogadores escolhidos."
+  create: "Criar álbum"
+  name-prompt: "Nome: 1–24 letras, números, _ ou -"
+  title-prompt: "Título (até 64 caracteres)"
+  player-prompt: "Jogador que poderá ver este álbum"
+  summary: "{name} · {count} fotos"
+  previous: "Página anterior"
+  next: "Próxima página"
+  back: "Voltar aos álbuns"
+  add-held: "Adicionar a foto na mão principal"
+  rename: "Editar título"
+  sharing: "Gerenciar acesso"
+  share: "Compartilhar com jogador"
+  revoke: "Clique para revogar o acesso imediatamente"
+  delete: "Excluir álbum"
+  delete-confirm: "Excluir este álbum e seus acessos? Fotos originais e cópias existentes serão mantidas."
+  photo-owner: "Clique: imprimir foto completa. Shift-clique: remover deste álbum."
+  photo-reader: "Clique para imprimir a foto completa usando seu papel."
+  result-saved: "<green>Álbum salvo."
+  result-missing: "<red>Álbum ou foto não encontrado."
+  result-denied: "<red>Você não tem acesso a este álbum ou foto."
+  result-invalid: "<red>Nome, título ou foto inválido ou duplicado. Use uma foto sua."
+  result-limit: "<red>Limite: 20 álbuns, 200 fotos por álbum, 32 jogadores autorizados."
+  result-unavailable: "<red>Armazenamento indisponível. Nenhuma alteração salva."
+  usage: "/snapshot albums [create NOME | open NOME | add NOME | title NOME TEXTO | share NOME JOGADOR | unshare NOME JOGADOR | delete NOME]"
+postcard:
+  disabled: "<gray>Cartões-postais estão desligados neste servidor."
+  no-photo: "<red>Segure uma foto para enviá-la como cartão-postal."
+  unknown: "<red>{player} nunca entrou neste servidor."
+  self: "<red>Envie cartões para outros jogadores."
+  too-long: "<red>A saudação pode ter no máximo {max} caracteres."
+  limit: "<red>Você pode enviar {max} cartões por dia."
+  mailbox-full: "<red>A caixa de correio de {player} está cheia."
+  sent: "<green>✉ Cartão-postal enviado para {player}."
+  waiting: "<gold>✉ {count} cartão(ões) esperando – libere espaço e use /snapshot postcards."
+  inbox: "Você recebeu um cartão-postal de {player}. Ele é entregue ao entrar; /snapshot postcards o pega."
+  none: "<gray>Nenhum cartão esperando por você."
+  inventory-full: "<gold>✉ Ainda {count} cartão(ões) esperando – libere espaço e use /snapshot postcards."
+  lore: "<gold>✉ Cartão-postal de {player}"
+  received: "<gold>✉ Um cartão-postal de {player}!"
+  received-text: "<gold>✉ Um cartão-postal de {player}: <gray>“{text}”"
+contest:
+  title: "Concurso: {theme} (faltam {time})"
+  entry-by: "<gray>de {player} · <gold>{votes} voto(s)"
+  entry-vote: "<green>Clique: votar"
+  entry-unvote: "<yellow>Clique: retirar seu voto"
+  entry-own: "<gray>Sua foto"
+  enter-button: "<gold>Participar com uma foto"
+  enter-hint: "<gray>Escolha uma das suas fotos da galeria"
+  picker-title: "Escolha sua foto"
+  back: "<gray>Voltar"
+  enter-ok: "<green>Sua foto está no concurso."
+  enter-closed: "<red>O concurso está encerrado."
+  enter-taken: "<red>Essa foto já está participando."
+  vote-unvoted: "<yellow>Voto retirado."
+  vote-own: "<gray>Você não pode votar na sua própria foto."
+  vote-missing: "<red>Essa foto não está mais no concurso."
+  vote-closed: "<red>O concurso está encerrado."
+  none: "<gray>Não há concurso de fotos agora."
+  none-last: "<gray>Nenhum concurso agora. Último vencedor ({theme}): <gold>{player}</gold> com {votes} voto(s)."
+  no-photos: "<gray>Exponha primeiro uma foto na galeria (clique direito no álbum)."
+  disabled: "<gray>Concursos de fotos estão desligados neste servidor."
+  start-usage: "<gray>/snapshot contest start HORAS TEMA (0,25 a 336 horas, tema de até 48 caracteres)"
+  already: "<red>Já há um concurso em andamento."
+  started: "<gold>📸 Concurso de fotos iniciado: “{theme}” – {time}. Participe e vote com /snapshot contest!"
+  winner: "<gold>📸 Concurso “{theme}” vencido por {player} com {votes} voto(s)!"
+  ended-empty: "<gray>📸 O concurso “{theme}” terminou sem fotos."
+  news-title: "Concurso de fotos: {theme}"
+  news-text: "{player} venceu com {votes} voto(s). Parabéns!"
+  won-inbox: "Você venceu o concurso de fotos “{theme}” com {votes} voto(s)!"
+
+# Core Panels
+panel:
+  browse: "Selecione uma entrada para ver detalhes e ações."
+  empty: "Nenhuma entrada para mostrar."
+  search: "Buscar nas legendas"
+  page: "Página {page}/{pages}"
+  style: "Estilo do filme"
+  format: "Formato"
+  frame: "Moldura"
+  timer: "Temporizador"
+  print: "Imprimir este mapa"
+  print-all: "Imprimir a foto inteira"
+  publish: "Publicar na galeria"
+  unpublish: "Retirar da galeria"
+  like: "Curtir"
+  unlike: "Descurtir"
+  vote: "Votar"
+  unvote: "Retirar voto"
+  photos: "Fotos"
+  open: "Abrir álbum"
+  revoke: "Revogar acesso"
+  remove-photo: "Remover do álbum"
+  photographer: "Fotógrafo"
+  world: "Mundo"
+  date: "Data"
+  location: "Local"
+  maps: "Mapas"
+  confirm: "Realizar esta ação?"
+  print-confirm: "Imprimir esta foto? O custo normal de filme se aplica (grátis no modo Criativo)."

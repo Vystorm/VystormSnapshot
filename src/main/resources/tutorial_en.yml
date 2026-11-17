@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Take a photo'
+    text: |
+      Hold a camera and right-click to take a photo of what you see. It becomes a map you can hang in an item frame.
+  - title: 'Album and gallery'
+    text: |
+      /snapshot opens your album. Put photos on show in the gallery or share private albums with friends.
+  - title: 'Camera settings'
+    text: |
+      /snapshot camera sets film style and frame; /snapshot format 2x1 makes wide photos; /snapshot caption adds a title.
+      Type /snapshot help to see every command.

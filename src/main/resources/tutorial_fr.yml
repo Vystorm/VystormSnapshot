@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Prendre une photo'
+    text: |
+      Tenez un appareil et faites un clic droit pour photographier ce que vous voyez. La photo devient une carte à accrocher.
+  - title: 'Album et galerie'
+    text: |
+      /snapshot ouvre votre album. Exposez des photos dans la galerie ou partagez des albums privés.
+  - title: 'Réglages de l’appareil'
+    text: |
+      /snapshot camera règle le style et le cadre ; /snapshot format 2x1 fait des photos larges ; /snapshot caption ajoute un titre.
+      Tapez /snapshot help pour voir toutes les commandes.

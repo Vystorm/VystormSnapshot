@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Сделать фото'
+    text: |
+      Держите камеру и нажмите ПКМ, чтобы сфотографировать вид. Фото станет картой для рамки.
+  - title: 'Альбом и галерея'
+    text: |
+      /snapshot открывает альбом. Выставляйте фото в галерее или делитесь личными альбомами.
+  - title: 'Настройки камеры'
+    text: |
+      /snapshot camera задаёт стиль и рамку; /snapshot format 2x1 — широкие фото; /snapshot caption — подпись.
+      Введите /snapshot help, чтобы увидеть все команды.

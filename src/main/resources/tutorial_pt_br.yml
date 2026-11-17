@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: 'Tirar uma foto'
+    text: |
+      Segure uma câmera e clique com o botão direito para fotografar. Vira um mapa para pendurar.
+  - title: 'Álbum e galeria'
+    text: |
+      /snapshot abre seu álbum. Exponha fotos na galeria ou compartilhe álbuns privados.
+  - title: 'Ajustes da câmera'
+    text: |
+      /snapshot camera ajusta estilo e moldura; /snapshot format 2x1 faz fotos largas; /snapshot caption adiciona um título.
+      Digite /snapshot help para ver todos os comandos.

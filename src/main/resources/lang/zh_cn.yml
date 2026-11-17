@@ -1,0 +1,290 @@
+photo-caption: "<gray>说明："
+album-caption-hint: "<gray>手持照片：/snapshot 说明 文字"
+caption-missing: "<gray>请在主手拿着你拍摄的 Snapshot 照片。"
+caption-not-owner: "<gray>只有摄影者可以修改此照片的说明。"
+caption-invalid: "<gray>最多输入 {max} 个字符，不允许控制字符或格式代码。"
+caption-unavailable: "<gray>无法保存相册，照片说明未更改。"
+caption-saved: "<gray>已为整张照片保存说明，新的副本将包含说明。"
+caption-cleared: "<gray>已移除整张照片的说明。"
+album-title-world: "相册：{world}（{count}）· {page}/{pages}"
+camera-name: "<gold>相机"
+camera-lore-left: "<gray>左键拍照（消耗 1 张纸）"
+camera-lore-right: "<gray>右键拍照（消耗 1 张纸）"
+photo-name: "<gold>照片"
+photo-lore: "<gray>📷 {player} · {world} · {date}"
+developing: "<gray>📷 冲洗中……"
+done: "<green>📷 你的照片已冲洗好。"
+cooldown: "<red>相机还在过片（{seconds} 秒）。"
+busy: "<red>当前正在冲洗的照片太多，请稍后再试。"
+no-film: "<red>你需要 {film} 才能拍照。"
+denied: "<red>你没有权限执行此操作。"
+reloaded: "<green>Vystorm Snapshot 已重新加载。"
+unknown-player: "<red>找不到该玩家。"
+given: "<green>已将相机给予 {player}。"
+usage-capture: "<gray>/snapshot capture WORLD X Y Z YAW PITCH"
+unknown-world: "<red>未知世界：{world} <gray>按 Tab 键查看可用的值。"
+captured: "<green>照片已完成：地图编号 {ids}。文件：photos/ID.png。第一张：/give @p filled_map[map_id={id}]"
+photo-name-part: "<gold>照片 <gray>({part})"
+photo-where: "<dark_gray>{where}"
+done-big: "<green>📷 你的 {format} 照片已冲洗好：共 {maps} 张地图，请并排挂起来。"
+hold-camera: "<red>请将相机拿在主手。"
+usage-format: "<gray>/snapshot format FORMAT – 可用：{formats}"
+format-set: "<green>相机已设为 {format}（每张照片消耗 {maps} 张地图和同样数量的纸）。"
+album-title: "相册（{count}）"
+album-reprint: "<yellow>左键重印（1 张纸）"
+album-title-page: "相册（{count}）· 第 {page}/{pages} 页"
+album-reprint-all: "<yellow>Shift + 点击重印整张照片（{maps} 张纸）"
+album-previous: "<yellow>« 第 {page} 页"
+album-next: "<yellow>第 {page} 页 »"
+camera-lore-settings: "<gray>胶片：<white>{style}</white> · {format} · <white>{frame}"
+camera-lore-menu: "<dark_gray>副手交换键（F）：相机菜单"
+camera-lore-sneak-menu: "<dark_gray>潜行 + 右键：相机菜单"
+camera-lore-timer: "<gray>自拍定时：<white>{seconds} 秒"
+camera-menu-timer: "<yellow>自拍定时 {seconds} 秒 <gray>（自己也能入镜）"
+camera-menu-timer-off: "<yellow>不使用自拍定时"
+timer-countdown: "<gold>📷 自拍定时：<yellow>{seconds}</yellow> ……"
+timer-running: "<gray>自拍定时已在进行中。"
+camera-menu-title: "相机"
+camera-menu-format: "<yellow>画幅 {format} <gray>（{maps} 张地图）"
+camera-menu-album: "<yellow>相册"
+camera-menu-gallery: "<yellow>画廊"
+style-color: "<yellow>彩色"
+style-black-white: "<yellow>黑白"
+style-sepia: "<yellow>棕褐"
+style-vintage: "<yellow>复古"
+style-noir: "<yellow>黑色电影"
+style-vivid: "<yellow>鲜艳"
+frame-none: "<yellow>无边框"
+frame-white: "<yellow>白色边框"
+frame-black: "<yellow>黑色边框"
+album-publish: "<aqua>右键在画廊中展出"
+album-published: "<light_purple>已在画廊展出 · ❤ {likes} <gray>（右键撤下）"
+gallery-title: "画廊（{count}）· {page}/{pages}"
+gallery-title-player: "{player} 的照片（{count}）· {page}/{pages}"
+gallery-likes: "<red>❤ <gray>{likes}"
+gallery-likes-yours: "<red>❤ <gray>{likes}（你已点赞）"
+gallery-like: "<yellow>点击点赞"
+gallery-unlike: "<yellow>点击取消点赞"
+gallery-print: "<yellow>Shift + 点击打印一份（{maps} 张纸）"
+gallery-remove: "<red>Shift + 右键撤下"
+gallery-sort-new: "<yellow>最新优先"
+gallery-sort-top: "<yellow>最多点赞优先"
+gallery-sort-hint: "<gray>点击切换"
+gallery-published: "<green>你的照片现已在画廊展出。"
+gallery-taken-down: "<gray>照片已从画廊撤下。"
+gallery-full: "<red>你已经展出了 {max} 张照片，请先撤下一张。"
+gallery-liked-by: "<red>❤ <gray>{player} 赞了你的照片。"
+gallery-own: "<gray>这是你自己的照片。"
+gallery-broken: "<red>照片画廊目前正在维护，暂时关闭。"
+gallery-broken-admin: "<red>照片画廊已关闭：无法读取 gallery.yml，已保留为 photos/{file}。请修复它，改回 gallery.yml 并重启。"
+menu-album: "相册"
+menu-album-desc: "你的照片：重印或放进画廊"
+menu-gallery: "照片画廊"
+menu-gallery-desc: "所有玩家的照片，按最新或最多点赞排序"
+menu-photos: "<yellow>{player} 的照片"
+menu-photos-lore: "<gray>画廊中有 {count} 张照片"
+
+# 通过 Vystorm Core 提供的 /snapshot：每位玩家看到自己语言的说明、帮助和 Tab 补全。commands.snapshot 下的 "aliases"
+# 是额外的主命令（全服生效，由管理员在 Core 配置 commands.localized-aliases 中选择语言）；子命令的 "name" 和
+# "aliases" 在所有语言中都可使用，英文始终有效。
+commands:
+  snapshot:
+    description: "相机照片：相册、相机菜单、画廊和照片格式"
+    aliases: [相机]
+    sub:
+      albums:
+        name: albums
+        aliases: []
+        description: "创建私人照片集并分享给指定玩家。"
+        args:
+          action: ACTION
+      search:
+        name: 搜索
+        aliases: []
+        description: "搜索自己相册中的说明"
+        args:
+          text: TEXT
+      album:
+        name: 相册
+        aliases: []
+        description: "打开你的相册，可按世界筛选"
+        args:
+          world: 世界
+      contest:
+        name: contest
+        aliases: []
+        description: "摄影比赛：投票与参赛"
+        sub:
+          start:
+            name: start
+            aliases: []
+            description: "开始摄影比赛"
+            args:
+              hours: HOURS
+              theme: THEME
+          end:
+            name: end
+            aliases: []
+            description: "立即结束摄影比赛"
+      camera:
+        name: 相机设置
+        aliases: []
+        description: "手中相机的胶片风格、格式和相框"
+      gallery:
+        name: 画廊
+        aliases: []
+        description: "所有人展出的照片，或某位玩家的照片"
+        args:
+          player: 玩家
+      format:
+        name: 格式
+        aliases: []
+        description: "手中相机的照片格式（例如 2x1）"
+        args:
+          format: 宽x高
+      postcard:
+        name: postcard
+        aliases: []
+        description: "将手中照片的副本附上问候寄出"
+        args:
+          player: PLAYER
+          text: TEXT
+      postcards:
+        name: postcards
+        aliases: []
+        description: "领取等待中的明信片"
+      caption:
+        name: 说明
+        aliases: []
+        description: "为手持照片设置说明；省略文字即可清除"
+        args:
+          text: 文字
+      give:
+        name: 给予
+        aliases: []
+        description: "给自己或一名玩家一台相机"
+        args:
+          player: 玩家
+      capture:
+        name: 拍摄
+        aliases: []
+        description: "从任意位置拍摄照片，例如用于出生点展板"
+        args:
+          world: 世界
+          x: X
+          "y": "Y"
+          z: Z
+          yaw: YAW
+          pitch: PITCH
+          format: 宽x高
+      reload:
+        name: 重载
+        aliases: []
+        description: "重新加载配置和语言文件"
+
+album-title-search: "<gold>搜索：{count} 张地图（{page}/{pages}）"
+capture-unloaded: "<red>相机所在区块尚未加载。请先前往该位置，再从控制台拍照。"
+
+# Free feature release: collections
+collections:
+  title: "照片集"
+  description: "创建私人照片集并分享给指定玩家。"
+  create: "创建照片集"
+  name-prompt: "名称：1–24 个英文字母、数字、_ 或 -"
+  title-prompt: "照片集标题（最多64个字符）"
+  player-prompt: "分享给哪位玩家"
+  summary: "{name} · {count}张照片"
+  previous: "上一页"
+  next: "下一页"
+  back: "返回照片集"
+  add-held: "添加主手中的照片"
+  rename: "修改照片集标题"
+  sharing: "管理分享"
+  share: "分享给玩家"
+  revoke: "点击立即撤销访问权限"
+  delete: "删除照片集"
+  delete-confirm: "删除此照片集及分享权限？原始照片和已打印照片会保留。"
+  photo-owner: "点击打印整张照片；Shift点击从照片集中移除。"
+  photo-reader: "点击消耗你的纸张打印整张照片。"
+  result-saved: "<green>照片集已保存。"
+  result-missing: "<red>未找到照片集或照片。"
+  result-denied: "<red>你无权访问此照片集或照片。"
+  result-invalid: "<red>名称、标题或照片无效或重复。请使用自己拍摄的照片。"
+  result-limit: "<red>已达上限：20个照片集，每集200张照片，32位分享玩家。"
+  result-unavailable: "<red>照片集存储不可用，未保存更改。"
+  usage: "/snapshot albums [create 名称 | open 名称 | add 名称 | title 名称 标题 | share 名称 玩家 | unshare 名称 玩家 | delete 名称]"
+postcard:
+  disabled: "<gray>本服务器已关闭明信片。"
+  no-photo: "<red>手持一张照片才能作为明信片寄出。"
+  unknown: "<red>{player} 从未进入过本服务器。"
+  self: "<red>请把明信片寄给其他玩家。"
+  too-long: "<red>问候最多 {max} 个字符。"
+  limit: "<red>你每天最多寄出 {max} 张明信片。"
+  mailbox-full: "<red>{player} 的信箱已满。"
+  sent: "<green>✉ 明信片已寄给 {player}。"
+  waiting: "<gold>✉ 有 {count} 张明信片在等你 —— 腾出空间后使用 /snapshot postcards。"
+  inbox: "你收到了来自 {player} 的明信片。登录时会交给你；/snapshot postcards 可领取。"
+  none: "<gray>没有等待你的明信片。"
+  inventory-full: "<gold>✉ 还有 {count} 张明信片在等你 —— 腾出空间后使用 /snapshot postcards。"
+  lore: "<gold>✉ 来自 {player} 的明信片"
+  received: "<gold>✉ 来自 {player} 的明信片！"
+  received-text: "<gold>✉ 来自 {player} 的明信片：<gray>“{text}”"
+contest:
+  title: "比赛：{theme}（剩余 {time}）"
+  entry-by: "<gray>作者 {player} · <gold>{votes} 票"
+  entry-vote: "<green>点击：投票"
+  entry-unvote: "<yellow>点击：撤回投票"
+  entry-own: "<gray>你的参赛作品"
+  enter-button: "<gold>提交照片"
+  enter-hint: "<gray>从你在画廊中展出的照片里选一张"
+  picker-title: "选择你的参赛照片"
+  back: "<gray>返回"
+  enter-ok: "<green>你的照片已参赛。"
+  enter-closed: "<red>比赛已结束。"
+  enter-taken: "<red>这张照片已经参赛。"
+  vote-unvoted: "<yellow>已撤回投票。"
+  vote-own: "<gray>不能给自己的照片投票。"
+  vote-missing: "<red>这张照片已不在比赛中。"
+  vote-closed: "<red>比赛已结束。"
+  none: "<gray>目前没有摄影比赛。"
+  none-last: "<gray>目前没有比赛。上届冠军（{theme}）：<gold>{player}</gold>，{votes} 票。"
+  no-photos: "<gray>请先在画廊展出一张照片（在相册中右键）。"
+  disabled: "<gray>本服务器已关闭摄影比赛。"
+  start-usage: "<gray>/snapshot contest start 小时 主题（0.25 至 336 小时，主题最多 48 个字符）"
+  already: "<red>已有比赛正在进行。"
+  started: "<gold>📸 摄影比赛开始：“{theme}”——{time}。用 /snapshot contest 参赛和投票！"
+  winner: "<gold>📸 比赛“{theme}”由 {player} 以 {votes} 票获胜！"
+  ended-empty: "<gray>📸 比赛“{theme}”结束，无人参赛。"
+  news-title: "摄影比赛：{theme}"
+  news-text: "{player} 以 {votes} 票获胜。恭喜！"
+  won-inbox: "你以 {votes} 票赢得了摄影比赛“{theme}”！"
+
+# Core Panels
+panel:
+  browse: "选择条目以查看详情和操作。"
+  empty: "暂无条目。"
+  search: "搜索照片说明"
+  page: "第 {page}/{pages} 页"
+  style: "胶片风格"
+  format: "尺寸"
+  frame: "相框"
+  timer: "自拍定时器"
+  print: "打印这张地图"
+  print-all: "打印整张照片"
+  publish: "发布到画廊"
+  unpublish: "从画廊撤下"
+  like: "点赞"
+  unlike: "取消点赞"
+  vote: "投票"
+  unvote: "撤回投票"
+  photos: "照片"
+  open: "打开相册"
+  revoke: "撤销访问权限"
+  remove-photo: "从相册移除"
+  photographer: "摄影者"
+  world: "世界"
+  date: "日期"
+  location: "地点"
+  maps: "地图"
+  confirm: "确定执行此操作？"
+  print-confirm: "打印这张照片？将消耗通常所需的胶片（创造模式免费）。"

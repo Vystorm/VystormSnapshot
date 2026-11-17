@@ -1,0 +1,290 @@
+{
+  "version": 1,
+  "intro": {
+    "en": "A few quick choices for Vystorm Snapshot. Everything else stays on its defaults.",
+    "de": "Ein paar schnelle Entscheidungen für Vystorm Snapshot. Alles andere bleibt auf Standard.",
+    "fr": "Quelques choix rapides pour Vystorm Snapshot. Le reste garde ses valeurs par défaut.",
+    "it": "Alcune scelte rapide per Vystorm Snapshot. Il resto resta predefinito.",
+    "pt_br": "Algumas escolhas rápidas para Vystorm Snapshot. O resto fica no padrão.",
+    "ru": "Несколько быстрых решений для Vystorm Snapshot. Остальное останется по умолчанию.",
+    "zh_cn": "Vystorm Snapshot 的几个快速选项，其余保持默认。"
+  },
+  "questions": [
+    {
+      "id": "craft",
+      "text": {
+        "en": "May players craft cameras?",
+        "de": "Dürfen Spieler Kameras herstellen?",
+        "fr": "Les joueurs peuvent-ils fabriquer des appareils photo ?",
+        "it": "I giocatori possono creare fotocamere?",
+        "pt_br": "Jogadores podem criar câmeras?",
+        "ru": "Можно ли создавать камеры?",
+        "zh_cn": "玩家可以合成相机吗？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:camera.craftable": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:camera.craftable": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "flash",
+      "text": {
+        "en": "Enable the flash?",
+        "de": "Blitz aktivieren?",
+        "fr": "Activer le flash ?",
+        "it": "Attivare il flash?",
+        "pt_br": "Ativar o flash?",
+        "ru": "Включить вспышку?",
+        "zh_cn": "启用闪光灯？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:flash.enabled": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:flash.enabled": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "gallery",
+      "text": {
+        "en": "Enable the photo gallery?",
+        "de": "Fotogalerie aktivieren?",
+        "fr": "Activer la galerie de photos ?",
+        "it": "Attivare la galleria foto?",
+        "pt_br": "Ativar a galeria de fotos?",
+        "ru": "Включить фотогалерею?",
+        "zh_cn": "启用相册？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:gallery.enabled": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:gallery.enabled": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "selfie",
+      "text": {
+        "en": "Allow selfies?",
+        "de": "Selfies erlauben?",
+        "fr": "Autoriser les selfies ?",
+        "it": "Consentire i selfie?",
+        "pt_br": "Permitir selfies?",
+        "ru": "Разрешить селфи?",
+        "zh_cn": "允许自拍？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:selfie": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:selfie": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "contest",
+      "text": {
+        "en": "Allow photo contests (admins start them, players enter and vote)?",
+        "de": "Fotowettbewerbe erlauben (Admins starten, Spieler reichen ein und stimmen ab)?",
+        "fr": "Autoriser les concours photo (les admins lancent, les joueurs participent et votent) ?",
+        "it": "Consentire i concorsi fotografici (gli admin li avviano, i giocatori partecipano e votano)?",
+        "pt_br": "Permitir concursos de fotos (admins iniciam, jogadores participam e votam)?",
+        "ru": "Разрешить фотоконкурсы (админы запускают, игроки участвуют и голосуют)?",
+        "zh_cn": "允许摄影比赛（管理员发起，玩家参赛并投票）？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:contest.enabled": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:contest.enabled": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "postcards",
+      "text": {
+        "en": "Allow postcards (send photos to other players)?",
+        "de": "Postkarten erlauben (Fotos an andere Spieler schicken)?",
+        "fr": "Autoriser les cartes postales (envoyer des photos) ?",
+        "it": "Consentire le cartoline (inviare foto ad altri)?",
+        "pt_br": "Permitir cartões-postais (enviar fotos a outros)?",
+        "ru": "Разрешить открытки (отправка фото другим игрокам)?",
+        "zh_cn": "允许明信片（把照片寄给其他玩家）？"
+      },
+      "type": "choice",
+      "recommended": "on",
+      "options": [
+        {
+          "id": "on",
+          "label": {
+            "en": "On",
+            "de": "An",
+            "fr": "Activé",
+            "it": "Attivo",
+            "pt_br": "Ligado",
+            "ru": "Вкл.",
+            "zh_cn": "开启"
+          },
+          "set": {
+            "config.yml:postcards.enabled": true
+          }
+        },
+        {
+          "id": "off",
+          "label": {
+            "en": "Off",
+            "de": "Aus",
+            "fr": "Désactivé",
+            "it": "Disattivo",
+            "pt_br": "Desligado",
+            "ru": "Выкл.",
+            "zh_cn": "关闭"
+          },
+          "set": {
+            "config.yml:postcards.enabled": false
+          }
+        }
+      ]
+    }
+  ]
+}

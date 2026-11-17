@@ -1,0 +1,94 @@
+# Vystorm Snapshot
+# Craft a camera (iron ingots around a glass pane, redstone below), aim and click: a few seconds later the photo
+# arrives as a map. Photos are stored as PNG files in plugins/VystormSnapshot/photos/<map id>.png.
+
+camera:
+  # Spyglass: right-click zooms like a viewfinder, left-click takes the photo.
+  material: SPYGLASS
+  # left-click or right-click
+  trigger: left-click
+  # Recipe: III / IGI / IRI (I = iron ingot, G = glass pane, R = redstone). false: only /snapshot give.
+  craftable: true
+  # Swap-hand key (F) with the camera in the main hand opens the camera menu (film style, format, frame, album).
+  # /snapshot camera opens it too. false: F swaps hands as usual.
+  menu-key: true
+
+# Server-side photos use the original block textures from a client JAR/resource-pack ZIP.
+# Put your own copy at plugins/VystormSnapshot/textures.zip, then /snapshot reload.
+# No Minecraft assets are bundled with the plugin. Missing textures retain map-colour fallback.
+rendering:
+  resource-pack: textures.zip
+  # Official profile skins are fetched asynchronously, with bounded cache/downloads.
+  player-skins: true
+
+# Item used up per photo (creative players shoot for free). "none" makes photos free for everyone.
+film: PAPER
+
+# Horizontal field of view in degrees and how far the camera sees in blocks.
+field-of-view: 70
+view-distance: 96
+
+cooldown-seconds: 5
+
+# Rendering is spread over ticks: rows of 128 rays per tick for all photos together. 8 rows = a photo in ~0.8 s.
+rows-per-tick: 8
+max-parallel-photos: 3
+
+# Field of view while looking through the spyglass (telephoto).
+zoom-field-of-view: 30
+
+# In the dark (light at the camera below 8) the flash lights up everything up to this many blocks away.
+flash:
+  enabled: true
+  range: 16
+
+# Sneak while taking a photo: the camera turns around and takes a selfie.
+selfie: true
+
+# Photo lore shows coordinates and compass direction.
+show-location: true
+
+# Photo formats players may choose with /snapshot format (maps across x down). Each map uses one film.
+formats: [1x1, 2x1, 2x2, 3x2]
+
+# Film styles players may choose in the camera menu: color, black-white, sepia, vintage, noir, vivid.
+# The first one is used when "color" is not in the list.
+styles: [color, black-white, sepia, vintage, noir, vivid]
+
+# Frames around photos (the whole picture, also on big photos): none, white (instant photo), black. [none] hides the choice.
+frames: [none, white, black]
+
+# Self-timer choices in the camera menu, in seconds (0 = no timer, at most 30). The camera stays where you clicked and
+# takes the photo after the countdown, with you in it if you stepped in front of it. [0] hides the choice.
+timers: [0, 3, 10]
+
+# Public photo gallery: players put photos on show from the album (right-click), everyone browses them with
+# /snapshot gallery, likes them and can take prints.
+gallery:
+  enabled: true
+  # Shift-click in the gallery gives a print of someone else's photo (one film per map, like a reprint).
+  prints: true
+  # Photos each player may show at once (a big photo counts once). 0 = no limit.
+  max-per-player: 20
+
+# Album captions: maximum Unicode characters (1-200), changed with /snapshot caption [text].
+captions:
+  max-length: 80
+
+postcards:
+  # Postcards: hold a photo and use /snapshot postcard <player> [greeting] to send a copy with a short greeting.
+  # Online players get it at once; offline players find it on their next join (and a note in the Vystorm Core inbox).
+  # /snapshot postcards collects cards that did not fit into the inventory. Permission vystormsnapshot.postcard.
+  enabled: true
+  # Postcards one player may send per 24 hours (admins are not limited).
+  per-day: 10
+
+contest:
+  # Photo contest: /snapshot contest start <hours> <theme> (admins) opens a contest. Players enter one of their
+  # gallery photos in /snapshot contest and vote once per photo (not for their own). When the time is up the photo with
+  # the most votes wins (on a tie the earlier entry); everyone is told, and with Vystorm Core news on, a news post.
+  enabled: true
+  # XP for the winner (0 = none; only when online at the end).
+  reward-xp: 100
+  # Console commands for the winner; {player} is replaced, e.g. "give {player} diamond 3".
+  reward-commands: []

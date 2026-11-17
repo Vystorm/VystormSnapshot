@@ -1,0 +1,13 @@
+title: 'Snapshot'
+permission: vystormsnapshot.use
+pages:
+  - title: '拍照'
+    text: |
+      手持相机右键即可拍下所见画面，照片会变成可挂在展示框中的地图。
+  - title: '相册与画廊'
+    text: |
+      /snapshot 打开你的相册。把照片放进画廊展示，或与好友分享私人相册。
+  - title: '相机设置'
+    text: |
+      /snapshot camera 设置风格和边框；/snapshot format 2x1 拍宽幅照片；/snapshot caption 添加标题。
+      输入 /snapshot help 查看全部命令。

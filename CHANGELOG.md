@@ -1,3 +1,19 @@
+## 1.19.0 — 2026-11-18
+
+- Requires Vystorm Core 0.65.0 or newer. Update Core before you update this plugin.
+- Every feature can now be switched on and off in `config.yml`. All switches are on by default, so a server that updates keeps working as before; the new keys are added to your existing `config.yml` with their comments. Each switch is listed in Core's `/vadmin features` with a one-line description in seven languages and applies at once, without a restart (only `tutorial.enabled` needs one).
+  - The whole plugin: `camera.enabled`. Off: the camera takes no photos and opens no menu, and every `/snapshot` command except `reload` is switched off. Photos already taken keep showing.
+  - Taking photos: `film-cost.enabled` (off: photos are free), `saved-photos.enabled` (off: new photos are not written to disk and show only until the next restart), `big-photos.enabled`, `camera-menu.enabled`, `film-styles.enabled`, `photo-frames.enabled`, `self-timer.enabled`, `telephoto.enabled`, `block-textures.enabled`.
+  - Keeping photos: `album.enabled`, `caption-search.enabled`, `captions.enabled`, `collections.enabled`.
+  - Admin tools: `admin-photos.enabled` (`/snapshot capture` and `/snapshot give`).
+  - Tutorial: `tutorial.enabled` (needs a restart).
+  - Keys that already existed keep their names and are now listed as switches too: `camera.craftable`, `camera.menu-key`, `selfie`, `show-location`, `rendering.player-skins`, `gallery.prints`.
+- A switched-off feature answers one shared message, "This feature is switched off on this server.", in all seven languages (new language key `feature-off`), its subcommands are hidden from help and tab completion, and its menus and buttons are closed. Photos, albums, captions, collections, the gallery, postcards and contests stay saved and work again when the switch is back on.
+- Tab completion and help follow a switch at once, without registering the command again.
+- Placeholders: the plugin registers its values with Vystorm Core under the namespace `snapshot`: photos in the album, photos and likes in the gallery and the gallery limit, collections, the running contest with theme, minutes left and entries, and the camera cooldown. Examples: `%vystorm_snapshot_photos%` (photos in the player's album) and `{snapshot:contest_theme}`. `/vadmin placeholders snapshot` lists them. A value of a switched-off feature is empty.
+- Faster: a click in a chest or another block container no longer copies its block state to check whether it is the contest menu.
+- The off messages of postcards and contests are now the shared message. README: postcards are in the command and permission tables, and the compatibility line says what the build checks.
+
 ## 1.18.0 — 2026-11-17
 
 - Requires Vystorm Core 0.64.0 or newer. Update Core before you update this plugin.

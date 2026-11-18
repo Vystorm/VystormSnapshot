@@ -90,11 +90,34 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     private volatile BlockTextures blockTextures = BlockTextures.EMPTY;
     private volatile long assetGeneration;
     private boolean playerSkins = true;
+    /** Every feature switch as read in load(); null (= all on) until then and in tests that build the plugin by hand. */
+    private Feature.Switches switches;
+
+    /** Minimum Vystorm Core: placeholders through api.placeholders(). */
+    static final String MIN_CORE = "0.65.0";
+
+    /** Whether a feature (and camera.enabled) is on; static so menus and mocked plugins in tests read the real field. */
+    static boolean enabled(SnapshotPlugin plugin, Feature feature) {
+        Feature.Switches current = plugin == null ? null : plugin.switches;
+        return current == null || current.on(feature);
+    }
+
+    private boolean on(Feature feature) { return enabled(this, feature); }
+
+    /** True (and the shared off message sent) when one of the features is switched off. */
+    private boolean off(CommandSender sender, Feature... features) {
+        for (Feature feature : features) {
+            if (on(feature)) continue;
+            lang.send(sender, "feature-off");
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public void onEnable() {
-        if (!CoreApi.atLeast("0.64.0")) {
-            getLogger().severe("Vystorm Core 0.64.0 or newer is required; please update Core first.");
+        if (!CoreApi.atLeast(MIN_CORE)) {
+            getLogger().severe("Vystorm Core " + MIN_CORE + " or newer is required; please update Core first.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -113,7 +136,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         gallery = new Gallery(getDataFolder().toPath().resolve("photos").resolve("gallery.yml"), getLogger(), core.data().files(), core.compat().platform());
         contest = new PhotoContest(getDataFolder().toPath().resolve("photos").resolve("contest.yml"), core.data().files());
         saveDefaultConfig();
-        lang = core.lang().register(this); try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
+        lang = core.lang().register(this);
+        registerTutorial();
         collections = new CollectionsMenu(this, core, new PhotoCollections(getDataFolder().toPath().resolve("photos/collections.yml"), getLogger(), core.data().files()), lang);
         assets=new SkinCache(core.compat().platform());
         load();
@@ -130,9 +154,9 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         try {
             var gui = core.gui();
             String group = Vystorm.vystorm_core._uiMethods.menu.MenuCategory.COMMUNITY.group();
-            gui.registerMenu(this, "album", lang.ref("menu-album"), Material.BOOK, p -> p.hasPermission("vystormsnapshot.use"),
+            gui.registerMenu(this, "album", lang.ref("menu-album"), Material.BOOK, p -> on(Feature.ALBUM) && p.hasPermission("vystormsnapshot.use"),
                     p -> openAlbum(p, 0), group, lang.ref("menu-album-desc"));
-            gui.registerMenu(this, "collections", lang.ref("collections.title"), Material.WRITABLE_BOOK, p -> p.hasPermission("vystormsnapshot.use"),
+            gui.registerMenu(this, "collections", lang.ref("collections.title"), Material.WRITABLE_BOOK, p -> on(Feature.COLLECTIONS) && p.hasPermission("vystormsnapshot.use"),
                     p -> collections.list(p, 0), group, lang.ref("collections.description"));
             gui.registerMenu(this, "gallery", lang.ref("menu-gallery"), Material.PAINTING, this::galleryOn,
                     p -> openGallery(p, 0, false, null, null), group, lang.ref("menu-gallery-desc"));
@@ -141,7 +165,10 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         }
         GalleryMenuEntries.register(this, core.gui().playerMenu(), gallery, lang);
         core.settings().config().register(this, "config.yml", this::load);
-        core.command().register(this, lang, commandSpec(this));
+        declareSwitches();
+        try { registerPlaceholders(core.placeholders()); }
+        catch (RuntimeException failure) { getLogger().log(Level.WARNING, "Placeholders not registered", failure); }
+        registerCommands();
         worker = core.tasks().of(this, "photo-developing").timer(1L, 1L, this::work);
         gallerySaver = core.tasks().of(this, "gallery-save").timer(200L, 200L, gallery::flush);
         try { for (int id : store.ids()) attach(Bukkit.getMap(id)); }
@@ -157,6 +184,44 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         if (gallery != null) gallery.flush();
         jobs.clear();
         if (recipeKey != null) Bukkit.removeRecipe(recipeKey);
+    }
+
+    /** The tutorial in /vmenu unless tutorial.enabled is false; read once, because Core lists tutorials when a plugin starts. */
+    void registerTutorial() {
+        if (!getConfig().getBoolean(Feature.TUTORIAL.path, true)) return;
+        try { core.registerTutorial(this); } catch (RuntimeException noTutorial) { getLogger().fine("Tutorial not registered: " + noTutorial); }
+    }
+
+    /** Every switch in /vadmin features with its one-line description in the admin's language. */
+    private void declareSwitches() {
+        var config = core.settings().config();
+        for (Feature feature : Feature.values()) {
+            config.feature(this, feature.path, null, lang.ref(feature.description()));
+            if (feature.needsRestart()) config.activation(this, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
+        }
+    }
+
+    /** Registers /snapshot once; the subcommands of switched-off features stay out of help and tab completion (asked live). */
+    private void registerCommands() {
+        core.command().register(this, lang, commandSpec(this));
+    }
+
+    /** The namespace {@code snapshot}: album, gallery, collections, contest and the camera (server thread; empty while switched off). */
+    void registerPlaceholders(Vystorm.vystorm_core._advancedMethods.placeholderHandler.PlaceholderInterface registry) {
+        SnapshotPlaceholders.register(registry, this, new SnapshotPlaceholders.Source() {
+            @Override public boolean on(Feature feature) { return SnapshotPlugin.this.on(feature); }
+            @Override public int photos(UUID player) { return album == null ? 0 : album.of(player, null, null).size(); }
+            @Override public Gallery gallery() { return gallery; }
+            @Override public int galleryMax() { return galleryMax; }
+            @Override public long collections(UUID player) {
+                return collections == null ? 0 : collections.data.visible(player).stream().filter(c -> c.owner().equals(player)).count();
+            }
+            @Override public PhotoContest contest() { return contest; }
+            @Override public long cooldownLeft(UUID player, long now) {
+                Long last = lastShot.get(player);
+                return last == null ? 0 : Math.max(0, cooldownMillis - (now - last));
+            }
+        }, key -> lang == null ? key : lang.ref(key));
     }
 
     private void registerPanels() {
@@ -184,6 +249,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     private void load() {
         reloadConfig();
+        Feature.Switches before = switches;
+        switches = Feature.Switches.read(getConfig());
         loadTextures();
         if (captionDefaults(getConfig())) saveConfig();
         captionMax = Math.clamp(getConfig().getInt("captions.max-length", 80), 1, 200);
@@ -192,7 +259,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         cameraMaterial = material == null || !material.isItem() ? Material.SPYGLASS : material;
         leftClick = !"right-click".equalsIgnoreCase(getConfig().getString("camera.trigger", "left-click"));
         String filmName = getConfig().getString("film", "PAPER");
-        film = "none".equalsIgnoreCase(filmName) ? null : core.compat().server().material(filmName, Material.PAPER);
+        // film-cost.enabled off: photos are free, whatever film says
+        film = !on(Feature.FILM) || "none".equalsIgnoreCase(filmName) ? null : core.compat().server().material(filmName, Material.PAPER);
         if (film != null && !film.isItem()) film = Material.PAPER;
         fov = Math.clamp(getConfig().getDouble("field-of-view", 70), 20, 120);
         distance = Math.clamp(getConfig().getDouble("view-distance", 96), 16, 256);
@@ -200,31 +268,31 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         maxJobs = Math.clamp(getConfig().getInt("max-parallel-photos", 3), 1, 32);
         cooldownMillis = Math.max(0, getConfig().getInt("cooldown-seconds", 5)) * 1000L;
         zoomFov = Math.clamp(getConfig().getDouble("zoom-field-of-view", 30), 5, 120);
-        flashRange = getConfig().getBoolean("flash.enabled", true) ? Math.clamp(getConfig().getDouble("flash.range", 16), 2, 64) : 0;
-        selfie = getConfig().getBoolean("selfie", true);
-        showLocation = getConfig().getBoolean("show-location", true);
+        flashRange = on(Feature.FLASH) ? Math.clamp(getConfig().getDouble("flash.range", 16), 2, 64) : 0;
+        selfie = on(Feature.SELFIE);
+        showLocation = on(Feature.SHOW_LOCATION);
         List<String> wanted = new ArrayList<>();
         for (String format : getConfig().getStringList("formats")) if (Format.parse(format) != null) wanted.add(format.toLowerCase(Locale.ROOT));
-        formats = wanted.isEmpty() ? List.of("1x1") : List.copyOf(wanted);
-        menuKey = getConfig().getBoolean("camera.menu-key", true);
+        formats = wanted.isEmpty() || !on(Feature.BIG_PHOTOS) ? List.of("1x1") : List.copyOf(wanted);
+        menuKey = on(Feature.MENU_KEY) && on(Feature.CAMERA_MENU);
         List<Style> wantedStyles = new ArrayList<>();
         for (String name : getConfig().getStringList("styles")) {
             Style style = Style.parse(name);
             if (style != null && !wantedStyles.contains(style)) wantedStyles.add(style);
         }
-        styles = wantedStyles.isEmpty() ? List.of(Style.COLOR) : List.copyOf(wantedStyles);
+        styles = wantedStyles.isEmpty() || !on(Feature.STYLES) ? List.of(Style.COLOR) : List.copyOf(wantedStyles);
         List<Style.Frame> wantedFrames = new ArrayList<>();
         for (String name : getConfig().getStringList("frames")) {
             Style.Frame frame = Style.Frame.parse(name);
             if (frame != null && !wantedFrames.contains(frame)) wantedFrames.add(frame);
         }
-        frames = wantedFrames.isEmpty() ? List.of(Style.Frame.NONE) : List.copyOf(wantedFrames);
-        timers = Format.timers(getConfig().isList("timers") ? getConfig().getIntegerList("timers") : List.of(0, 3, 10));
-        galleryEnabled = getConfig().getBoolean("gallery.enabled", true);
-        galleryPrints = getConfig().getBoolean("gallery.prints", true);
+        frames = wantedFrames.isEmpty() || !on(Feature.FRAMES) ? List.of(Style.Frame.NONE) : List.copyOf(wantedFrames);
+        timers = on(Feature.TIMER) ? Format.timers(getConfig().isList("timers") ? getConfig().getIntegerList("timers") : List.of(0, 3, 10)) : List.of(0);
+        galleryEnabled = on(Feature.GALLERY);
+        galleryPrints = on(Feature.PRINTS);
         galleryMax = Math.max(0, getConfig().getInt("gallery.max-per-player", 20));
         Bukkit.removeRecipe(recipeKey);
-        if (getConfig().getBoolean("camera.craftable", true)) {
+        if (on(Feature.CRAFTABLE)) {
             ShapedRecipe recipe = new ShapedRecipe(recipeKey, camera(null));
             recipe.shape("III", "IGI", "IRI");
             recipe.setIngredient('I', Material.IRON_INGOT);
@@ -233,11 +301,17 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             Bukkit.addRecipe(recipe);
             for (Player player : Bukkit.getOnlinePlayers()) player.discoverRecipe(recipeKey);
         }
+        // help and tab completion ask the switches live; only send online players their command list again
+        if (before != null && !before.equals(switches)) {
+            try { core.command().refresh(); }
+            catch (RuntimeException failure) { getLogger().log(Level.WARNING, "Command list not sent again", failure); }
+        }
     }
 
     private void loadTextures() {
-        playerSkins = getConfig().getBoolean("rendering.player-skins", true);
+        playerSkins = on(Feature.SKINS);
         long generation = ++assetGeneration;
+        if (!on(Feature.TEXTURES)) { blockTextures = BlockTextures.EMPTY; return; } // block-textures.enabled off: map colours
         var pack = getDataFolder().toPath().resolve(getConfig().getString("rendering.resource-pack", "textures.zip"));
         if (!java.nio.file.Files.isRegularFile(pack)) {
             blockTextures = BlockTextures.EMPTY;
@@ -264,6 +338,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** Captions belong to the album record, so future prints and gallery icons share the same text. */
     void caption(Player player, String text) {
+        if (off(player, Feature.CAPTIONS)) return;
         ItemStack held = player.getInventory().getItemInMainHand();
         if (!(held.getItemMeta() instanceof MapMeta meta) || !meta.hasMapView() || meta.getMapView() == null) {
             lang.send(player, "caption-missing");
@@ -331,6 +406,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void openCameraMenu(Player player) {
+        if (off(player, Feature.CAMERA_MENU)) return;
         if (openPanel(player, "camera", 0, null, null, null, null, false)) return;
         openCameraChest(player);
     }
@@ -388,20 +464,20 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (getConfig().getBoolean("camera.craftable", true)) event.getPlayer().discoverRecipe(recipeKey);
+        if (on(Feature.CRAFTABLE)) event.getPlayer().discoverRecipe(recipeKey);
         if(playerSkins)assets.request(event.getPlayer());
         Player joined = event.getPlayer();
-        if (postcards != null && postcards.pending(joined.getUniqueId()) > 0)
+        if (postcards != null && postcardsEnabled() && postcards.pending(joined.getUniqueId()) > 0)
             Bukkit.getScheduler().runTaskLater(this, () -> { if (joined.isOnline()) collectPostcards(joined, false); }, 60L);
     }
 
     // ---- postcards ----
 
-    private boolean postcardsEnabled() { return getConfig().getBoolean("postcards.enabled", true); }
+    private boolean postcardsEnabled() { return on(Feature.POSTCARDS) && getConfig().getBoolean(Feature.POSTCARDS.path, true); }
 
     /** {@code /snapshot postcard PLAYER [greeting]}: sends a copy of the held photo. */
     void postcard(Player sender, String to, String greeting) {
-        if (!postcardsEnabled()) { lang.send(sender, "postcard.disabled"); return; }
+        if (!postcardsEnabled()) { lang.send(sender, "feature-off"); return; }
         ItemStack held = sender.getInventory().getItemInMainHand();
         if (!(held.getItemMeta() instanceof MapMeta meta) || !meta.hasMapView() || meta.getMapView() == null || album.entry(meta.getMapView().getId()) == null) {
             lang.send(sender, "postcard.no-photo"); return;
@@ -430,6 +506,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** {@code /snapshot postcards}: takes waiting postcards into free inventory slots. */
     void collectPostcards(Player player, boolean manual) {
+        if (!postcardsEnabled()) { if (manual) lang.send(player, "feature-off"); return; }
         int waiting = postcards.pending(player.getUniqueId());
         if (waiting == 0) { if (manual) lang.send(player, "postcard.none"); return; }
         int free = 0;
@@ -467,11 +544,12 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** Stage ACT, registered in {@link #handleSharedEvents} for cancelled clicks too. */
     public void onUse(PlayerInteractEvent event) {
+        if (!on(Feature.CAMERA)) return; // camera.enabled off: the camera is an ordinary item
         if (event.getHand() != EquipmentSlot.HAND || !isCamera(event.getItem())) return;
         Action action = event.getAction();
         boolean left = action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK;
         boolean right = action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
-        if (right && event.getPlayer().isSneaking()) {
+        if (right && event.getPlayer().isSneaking() && on(Feature.CAMERA_MENU)) {
             event.setCancelled(true);
             if (!event.getPlayer().hasPermission("vystormsnapshot.use")) { lang.send(event.getPlayer(), "denied"); return; }
             openCameraMenu(event.getPlayer());
@@ -537,7 +615,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     /** Takes the photo from {@code eye} with the settings of {@code camera}; {@code timed} keeps the photographer in it. */
     private void capture(Player player, Location eye, ItemStack camera, int[] format, boolean timed) {
         // telephoto while looking through the spyglass
-        boolean zoomed = !timed && player.isHandRaised() && player.getItemInUse() != null && player.getItemInUse().getType() == Material.SPYGLASS;
+        boolean zoomed = !timed && on(Feature.TELEPHOTO) && player.isHandRaised() && player.getItemInUse() != null && player.getItemInUse().getType() == Material.SPYGLASS;
         double angle = zoomed ? zoomFov : fov;
         // selfie: sneaking turns the camera around, three blocks in front of the face
         boolean turned = !timed && selfie && player.isSneaking();
@@ -570,6 +648,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** {@code /snapshot format <WxH>} on the camera in hand. */
     void setFormat(Player player, String[] args) {
+        if (off(player, Feature.BIG_PHOTOS)) return;
         ItemStack camera = player.getInventory().getItemInMainHand();
         if (!isCamera(camera)) { lang.send(player, "hold-camera"); return; }
         if (args.length < 2 || !formats.contains(args[1].toLowerCase(Locale.ROOT))) {
@@ -590,6 +669,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void openAlbum(Player player, int page, String world, String query) {
+        if (off(player, Feature.ALBUM)) return;
+        if (query != null && off(player, Feature.SEARCH)) return;
         if (openPanel(player, "album", page, world, query, null, null, false)) return;
         openAlbumChest(player, page, world, query);
     }
@@ -620,6 +701,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             lang.send(player, player.hasPermission("vystormsnapshot.gallery.moderate") ? "gallery-broken-admin" : "gallery-broken", "file", gallery.broken());
             return;
         }
+        if (!galleryEnabled) { lang.send(player, "feature-off"); return; }
         if (!galleryOn(player)) { lang.send(player, "denied"); return; }
         player.openInventory(gallery.menu(this, lang, player, page, top, onlyBy, onlyName));
     }
@@ -650,7 +732,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     // ---- photo contest ----
 
-    boolean contestEnabled() { return getConfig().getBoolean("contest.enabled", true); }
+    boolean contestEnabled() { return on(Feature.CONTEST) && getConfig().getBoolean(Feature.CONTEST.path, true); }
 
     /** "2 h 15 min", "45 min". */
     static String duration(long minutes) {
@@ -664,7 +746,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void openContestChest(Player player) {
-        if (!contestEnabled()) { lang.send(player, "contest.disabled"); return; }
+        if (!contestEnabled()) { lang.send(player, "feature-off"); return; }
         long now = System.currentTimeMillis();
         if (!contest.running(now)) {
             var last = contest.last();
@@ -711,7 +793,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** {@code /snapshot contest start <hours> <theme>} and {@code /snapshot contest end}. */
     void contestAdmin(CommandSender sender, String action, String hours, String theme) {
-        if (!contestEnabled()) { lang.send(sender, "contest.disabled"); return; }
+        if (!contestEnabled()) { lang.send(sender, "feature-off"); return; }
         if ("end".equals(action)) {
             if (contest.theme() == null) { lang.send(sender, "contest.none"); return; }
             PhotoContest.Result result = finishContest();
@@ -729,7 +811,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         if (!(sender instanceof Player)) lang.send(sender, "contest.started", "theme", clean, "time", duration(Math.round(h * 60)));
     }
 
-    private void contestTick() { if (contest != null && contest.due(System.currentTimeMillis())) finishContest(); }
+    private void contestTick() { if (contest != null && contestEnabled() && contest.due(System.currentTimeMillis())) finishContest(); }
 
     /** Closes the contest, announces the winner (chat, Core news) and pays the reward. */
     private PhotoContest.Result finishContest() {
@@ -822,7 +904,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     private MapView develop(org.bukkit.World world, byte[] pixels) {
         MapView view = Bukkit.createMap(world);
         byte[] copy = pixels.clone();
-        try {
+        // saved-photos.enabled off: the photo is not written to disk and shows only until the next restart
+        if (on(Feature.SAVED_PHOTOS)) try {
             store.save(view.getId(), copy, index -> Palette.color((byte) index).getRGB() & 0xFFFFFF);
         } catch (IOException failure) {
             getLogger().log(Level.WARNING, "Could not save photo " + view.getId(), failure);
@@ -833,6 +916,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** Console/admin photo from any position, e.g. for spawn boards: {@code capture <world> <x> <y> <z> <yaw> <pitch>}. */
     void capture(CommandSender sender, String[] args) {
+        if (off(sender, Feature.ADMIN_PHOTOS)) return;
         if (args.length < 7) { lang.send(sender, "usage-capture"); return; }
         if(jobs.size()>=maxJobs){lang.send(sender,"busy");return;}
         org.bukkit.World world = Bukkit.getWorld(args[1]);
@@ -889,36 +973,36 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         return CommandSpec.command("snapshot")
                 .permission("vystormsnapshot.use")
                 .executes(ctx -> { if (ctx.sender() instanceof org.bukkit.entity.Player player) p.openAlbum(player, 0); else ctx.sender().sendMessage("/snapshot help"); })
-                .sub("albums", s -> s.playerOnly().arg(Arg.greedy("action").optional().suggests((ctx, prefix) -> CollectionsMenu.suggestActions(prefix)))
-                        .executes(ctx -> p.collections.command(ctx.player(), ctx.get("action"))))
-                .sub("search", s -> s.playerOnly().arg(Arg.greedy("text"))
+                .sub("albums", s -> gate(s, p, Feature.COLLECTIONS).playerOnly().arg(Arg.greedy("action").optional().suggests((ctx, prefix) -> CollectionsMenu.suggestActions(prefix)))
+                        .executes(ctx -> { if (!p.off(ctx.player(), Feature.COLLECTIONS)) p.collections.command(ctx.player(), ctx.get("action")); }))
+                .sub("search", s -> gate(gate(s, p, Feature.ALBUM), p, Feature.SEARCH).playerOnly().arg(Arg.greedy("text"))
                         .executes(ctx -> p.openAlbum(ctx.player(), 0, null, ctx.get("text"))))
-                .sub("album", s -> s.playerOnly().arg(Arg.word("world").optional().suggests((ctx, prefix) -> p.albumWorlds(ctx.player())))
+                .sub("album", s -> gate(s, p, Feature.ALBUM).playerOnly().arg(Arg.word("world").optional().suggests((ctx, prefix) -> p.albumWorlds(ctx.player())))
                         .executes(ctx -> {
                             String world = ctx.get("world");
                             if (world == null) p.openAlbum(ctx.player(), 0);
                             else p.openAlbum(ctx.player(), 0, world);
                         }))
-                .sub("camera", s -> s.playerOnly().executes(ctx -> p.openCameraMenu(ctx.player())))
-                .sub("contest", s -> s.playerOnly().executes(ctx -> p.openContest(ctx.player()))
+                .sub("camera", s -> gate(s, p, Feature.CAMERA_MENU).playerOnly().executes(ctx -> p.openCameraMenu(ctx.player())))
+                .sub("contest", s -> gate(s, p, Feature.CONTEST).playerOnly().executes(ctx -> p.openContest(ctx.player()))
                         .sub("start", c -> c.permission("vystormsnapshot.admin").arg(Arg.word("hours")).arg(Arg.greedy("theme"))
                                 .executes(ctx -> p.contestAdmin(ctx.sender(), "start", ctx.get("hours"), ctx.get("theme"))))
                         .sub("end", c -> c.permission("vystormsnapshot.admin").executes(ctx -> p.contestAdmin(ctx.sender(), "end", null, null))))
-                .sub("gallery", s -> s.playerOnly().arg(Arg.playerName("player").optional())
+                .sub("gallery", s -> gate(s, p, Feature.GALLERY).playerOnly().arg(Arg.playerName("player").optional())
                         .executes(ctx -> p.gallery(ctx.player(), ctx.get("player"))))
-                .sub("format", s -> s.playerOnly().arg(Arg.word("format").optional().suggests((ctx, prefix) -> p.formats()))
+                .sub("format", s -> gate(s, p, Feature.BIG_PHOTOS).playerOnly().arg(Arg.word("format").optional().suggests((ctx, prefix) -> p.formats()))
                         .executes(ctx -> {
                             String format = ctx.get("format");
                             p.setFormat(ctx.player(), format == null ? new String[]{"format"} : new String[]{"format", format});
                         }))
-                .sub("postcard", s -> s.permission("vystormsnapshot.postcard").playerOnly().arg(Arg.playerName("player")).arg(Arg.greedy("text").optional())
+                .sub("postcard", s -> gate(s, p, Feature.POSTCARDS).permission("vystormsnapshot.postcard").playerOnly().arg(Arg.playerName("player")).arg(Arg.greedy("text").optional())
                         .executes(ctx -> p.postcard(ctx.player(), ctx.get("player"), ctx.get("text"))))
-                .sub("postcards", s -> s.permission("vystormsnapshot.postcard").playerOnly().executes(ctx -> p.collectPostcards(ctx.player(), true)))
-                .sub("caption", s -> s.playerOnly().arg(Arg.greedy("text").optional())
+                .sub("postcards", s -> gate(s, p, Feature.POSTCARDS).permission("vystormsnapshot.postcard").playerOnly().executes(ctx -> p.collectPostcards(ctx.player(), true)))
+                .sub("caption", s -> gate(s, p, Feature.CAPTIONS).playerOnly().arg(Arg.greedy("text").optional())
                         .executes(ctx -> p.caption(ctx.player(), ctx.get("text"))))
-                .sub("give", s -> s.permission("vystormsnapshot.admin").arg(Arg.playerName("player").optional())
+                .sub("give", s -> gate(s, p, Feature.ADMIN_PHOTOS).permission("vystormsnapshot.admin").arg(Arg.playerName("player").optional())
                         .executes(ctx -> p.give(ctx.sender(), ctx.get("player"))))
-                .sub("capture", s -> s.permission("vystormsnapshot.admin")
+                .sub("capture", s -> gate(s, p, Feature.ADMIN_PHOTOS).permission("vystormsnapshot.admin")
                         .arg(Arg.word("world").suggests((ctx, prefix) -> p.worldNames()))
                         .arg(Arg.word("x")).arg(Arg.word("y")).arg(Arg.word("z")).arg(Arg.word("yaw")).arg(Arg.word("pitch"))
                         .arg(Arg.word("format").optional().suggests((ctx, prefix) -> p.formats()))
@@ -931,6 +1015,14 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
                 .build();
     }
 
+    /**
+     * Keeps a subcommand out of help and tab completion while its switch (or camera.enabled) is off, asked at every
+     * completion so a switch applies at once; it still answers the off message.
+     */
+    static CommandSpec.Builder gate(CommandSpec.Builder sub, SnapshotPlugin p, Feature feature) {
+        return p == null ? sub : sub.visibleWhen(() -> enabled(p, feature));
+    }
+
     void reload(CommandSender sender) {
         load();
         lang.send(sender, "reloaded");
@@ -938,6 +1030,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** {@code /snapshot gallery [player]}: everyone's photos, or one photographer's. */
     void gallery(Player player, String name) {
+        if (off(player, Feature.GALLERY)) return;
         if (name == null) { openGallery(player, 0, false, null, null); return; }
         var target = core.compat().platform().getOfflinePlayerIfCached(name);
         if (target == null) { lang.send(player, "unknown-player"); return; }
@@ -946,6 +1039,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     /** {@code /snapshot give [player]}: a camera for the player (default: the sender). */
     void give(CommandSender sender, String name) {
+        if (off(sender, Feature.ADMIN_PHOTOS)) return;
         Player target = name != null ? Bukkit.getPlayerExact(name) : sender instanceof Player self ? self : null;
         if (target == null) { lang.send(sender, "unknown-player"); return; }
         target.getInventory().addItem(camera(target));

@@ -87,7 +87,8 @@ final class ContestMenu {
 
         @EventHandler
         public void onClick(InventoryClickEvent event) {
-            if (!(inventories.top(event.getView()).getHolder() instanceof Holder holder)) return;
+            // a menu made by this plugin: menuHolder skips block containers without copying their block state
+            if (!(inventories.menuHolder(inventories.top(event.getView())) instanceof Holder holder)) return;
             event.setCancelled(true);
             if (event.getClickedInventory() != inventories.top(event.getView()) || !(event.getWhoClicked() instanceof Player player)) return;
             int slot = event.getSlot();
@@ -102,7 +103,7 @@ final class ContestMenu {
 
         @EventHandler
         public void onDrag(InventoryDragEvent event) {
-            if (inventories.top(event.getView()).getHolder() instanceof Holder) event.setCancelled(true);
+            if (inventories.menuHolder(inventories.top(event.getView())) instanceof Holder) event.setCancelled(true);
         }
     }
 }

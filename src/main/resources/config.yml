@@ -1,8 +1,16 @@
 # Vystorm Snapshot
 # Craft a camera (iron ingots around a glass pane, redstone below), aim and click: a few seconds later the photo
 # arrives as a map. Photos are stored as PNG files in plugins/VystormSnapshot/photos/<map id>.png.
+#
+# Every feature has an on/off switch (all on by default). They are listed in Vystorm Core's /vadmin features and
+# apply at once without a restart, except tutorial.enabled. A switched-off feature does nothing, its commands answer
+# "This feature is switched off on this server." and its placeholders are empty. Photos, albums, captions,
+# collections, the gallery, postcards and contests stay saved and are used again when the switch is turned back on.
 
 camera:
+  # The whole plugin. Off: the camera takes no photos and opens no menu, and every /snapshot command except reload is
+  # switched off. Photos already taken keep showing on their maps.
+  enabled: true
   # Spyglass: right-click zooms like a viewfinder, left-click takes the photo.
   material: SPYGLASS
   # left-click or right-click
@@ -20,9 +28,24 @@ rendering:
   resource-pack: textures.zip
   # Official profile skins are fetched asynchronously, with bounded cache/downloads.
   player-skins: true
+# The block textures above. Off: photos use map colours even when textures.zip is there.
+block-textures:
+  enabled: true
 
 # Item used up per photo (creative players shoot for free). "none" makes photos free for everyone.
 film: PAPER
+# The film cost above. Off: photos are free, whatever film says.
+film-cost:
+  enabled: true
+
+# Photos are written as PNG files and shown again after a restart. Off: new photos are not written and show only until
+# the next restart; photos saved before keep loading.
+saved-photos:
+  enabled: true
+
+# The camera menu: sneak + right-click, the F key (camera.menu-key) and /snapshot camera. Off: no camera menu.
+camera-menu:
+  enabled: true
 
 # Horizontal field of view in degrees and how far the camera sees in blocks.
 field-of-view: 70
@@ -36,6 +59,9 @@ max-parallel-photos: 3
 
 # Field of view while looking through the spyglass (telephoto).
 zoom-field-of-view: 30
+# Telephoto through the spyglass. Off: the normal field of view, also while looking through it.
+telephoto:
+  enabled: true
 
 # In the dark (light at the camera below 8) the flash lights up everything up to this many blocks away.
 flash:
@@ -50,17 +76,41 @@ show-location: true
 
 # Photo formats players may choose with /snapshot format (maps across x down). Each map uses one film.
 formats: [1x1, 2x1, 2x2, 3x2]
+# Big photos with the formats above. Off: every photo is 1x1 and /snapshot format is switched off.
+big-photos:
+  enabled: true
 
 # Film styles players may choose in the camera menu: color, black-white, sepia, vintage, noir, vivid.
 # The first one is used when "color" is not in the list.
 styles: [color, black-white, sepia, vintage, noir, vivid]
+# Film styles above. Off: every photo is in colour and the choice is hidden.
+film-styles:
+  enabled: true
 
 # Frames around photos (the whole picture, also on big photos): none, white (instant photo), black. [none] hides the choice.
 frames: [none, white, black]
+# Photo frames above. Off: no frames and the choice is hidden.
+photo-frames:
+  enabled: true
 
 # Self-timer choices in the camera menu, in seconds (0 = no timer, at most 30). The camera stays where you clicked and
 # takes the photo after the countdown, with you in it if you stepped in front of it. [0] hides the choice.
 timers: [0, 3, 10]
+# The self-timer above. Off: no timer and the choice is hidden.
+self-timer:
+  enabled: true
+
+# Album: /snapshot, /snapshot album [world], reprints and the Core main menu entry. Off: the album is switched off;
+# new photos are still added to it.
+album:
+  enabled: true
+# /snapshot search TEXT finds own photos by caption (needs album.enabled). Off: the command is switched off.
+caption-search:
+  enabled: true
+
+# Private collections: /snapshot albums. Off: the command, the menus and the Core main menu entry are switched off.
+collections:
+  enabled: true
 
 # Public photo gallery: players put photos on show from the album (right-click), everyone browses them with
 # /snapshot gallery, likes them and can take prints.
@@ -73,6 +123,8 @@ gallery:
 
 # Album captions: maximum Unicode characters (1-200), changed with /snapshot caption [text].
 captions:
+  # /snapshot caption [text]. Off: no new captions; existing captions stay on the photos.
+  enabled: true
   max-length: 80
 
 postcards:
@@ -92,3 +144,11 @@ contest:
   reward-xp: 100
   # Console commands for the winner; {player} is replaced, e.g. "give {player} diamond 3".
   reward-commands: []
+
+# Admin photos: /snapshot capture (a photo from any position) and /snapshot give. Off: both commands are switched off.
+admin-photos:
+  enabled: true
+
+# Tutorial in the Vystorm Core main menu (/vmenu -> Tutorials). Needs a server restart to apply.
+tutorial:
+  enabled: true

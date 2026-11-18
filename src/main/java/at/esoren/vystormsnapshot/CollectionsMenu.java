@@ -23,7 +23,7 @@ final class CollectionsMenu implements Listener {
     final PhotoCollections data;
     private final Lang lang;
     CollectionsMenu(SnapshotPlugin plugin, API core, PhotoCollections data, Lang lang) { this.plugin = plugin; this.core = core; this.data = data; this.lang = lang; }
-    private boolean allowed(Player p) { return p.isOnline() && p.hasPermission("vystormsnapshot.use"); }
+    private boolean allowed(Player p) { return SnapshotPlugin.enabled(plugin, Feature.COLLECTIONS) && p.isOnline() && p.hasPermission("vystormsnapshot.use"); }
     private void result(Player p, PhotoCollections.Result r) { lang.send(p, "collections.result-" + r.name().toLowerCase(Locale.ROOT)); }
     void prompt(Player p, String key, String initial, Consumer<String> response) {
         p.closeInventory();

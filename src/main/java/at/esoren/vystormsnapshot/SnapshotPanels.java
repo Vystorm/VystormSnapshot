@@ -53,8 +53,11 @@ final class SnapshotPanels {
     private boolean allowed(Player p, String name) {
         if (!plugin.isEnabled() || !p.isOnline() || !p.hasPermission("vystormsnapshot.use")) return false;
         State s = state(p, name);
+        if (!SnapshotPlugin.enabled(plugin, Feature.CAMERA)) return false;
+        if (name.startsWith("collection") || name.equals("sharing")) { if (!SnapshotPlugin.enabled(plugin, Feature.COLLECTIONS)) return false; }
         return switch (name) {
-            case "camera" -> plugin.isCamera(p.getInventory().getItemInMainHand());
+            case "camera" -> SnapshotPlugin.enabled(plugin, Feature.CAMERA_MENU) && plugin.isCamera(p.getInventory().getItemInMainHand());
+            case "album" -> SnapshotPlugin.enabled(plugin, Feature.ALBUM);
             case "gallery" -> plugin.galleryOn(p);
             case "contest", "contest-picker" -> plugin.contestEnabled() && contest.running(System.currentTimeMillis());
             case "collection", "sharing" -> {

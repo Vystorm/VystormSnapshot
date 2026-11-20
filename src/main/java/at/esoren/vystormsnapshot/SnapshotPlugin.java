@@ -969,26 +969,24 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         }
     }
 
-    private void prepare(MapView view, byte[] pixels) {
+    private void prepare(MapView view, byte[] pixels) { prepare(view, new PhotoRenderer(pixels)); }
+
+    private void prepare(MapView view, PhotoRenderer photo) {
         for (var renderer : new ArrayList<>(view.getRenderers())) view.removeRenderer(renderer);
         view.setTrackingPosition(false);
         view.setUnlimitedTracking(false);
         view.setLocked(true);
-        view.addRenderer(new PhotoRenderer(pixels));
+        view.addRenderer(photo);
         attached.put(view.getId(), true);
     }
 
+    /** A stored photo gets its renderer now; its PNG is read when a player first sees the map. */
     private void attach(MapView view) {
         if (view == null || attached.containsKey(view.getId())) return;
-        try {
-            int[] rgb = store.load(view.getId());
-            if (rgb == null) return;
-            byte[] pixels = new byte[rgb.length];
-            for (int i = 0; i < rgb.length; i++) pixels[i] = palette.match(rgb[i]);
-            prepare(view, pixels);
-        } catch (IOException failure) {
-            getLogger().log(Level.WARNING, "Could not load photo " + view.getId(), failure);
-        }
+        int id = view.getId();
+        if (!java.nio.file.Files.isRegularFile(store.file(id))) return;
+        prepare(view, new PhotoRenderer(store.later(id, rgb -> palette.match(rgb),
+                failure -> getLogger().log(Level.WARNING, "Could not load photo " + id, failure))));
     }
 
     @EventHandler

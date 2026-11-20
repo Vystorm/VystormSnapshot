@@ -1,3 +1,9 @@
+## 1.20.1 — 2026-11-20
+
+- Faster start on servers with many photos: the plugin no longer reads and decodes every PNG in `photos/` when the server starts. A photo is read the first time a player sees its map after a restart.
+- Less memory: photos nobody looks at during an uptime are not held in memory, and after a photo is drawn on its map the plugin lets go of its own copy of the pixels. The map keeps the picture.
+- Photos look the same as before. Nothing changes in `photos/` or `album.yml`, so you can go back to 1.20.0 at any time.
+
 ## 1.20.0 — 2026-11-20
 
 - Fixed: a `config.yml` with a YAML mistake is no longer overwritten. The plugin leaves the file as it is, names the line and column of the mistake in the console and in the answer of `/snapshot reload`, and keeps the last working settings (at start: the default settings) until you fix it.

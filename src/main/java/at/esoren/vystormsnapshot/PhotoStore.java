@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 
 /**
@@ -40,6 +42,25 @@ final class PhotoStore {
         int[] rgb = new int[Optics.SIZE * Optics.SIZE];
         for (int i = 0; i < rgb.length; i++) rgb[i] = image.getRGB(i % Optics.SIZE, i / Optics.SIZE) & 0xFFFFFF;
         return rgb;
+    }
+
+    /**
+     * Map colour indices of a stored photo, read from the PNG only when the supplier is asked (a player sees the map);
+     * null if the file is missing, not 128×128 or unreadable ({@code onFailure} hears about read errors).
+     */
+    Supplier<byte[]> later(int mapId, IntUnaryOperator match, Consumer<IOException> onFailure) {
+        return () -> {
+            try {
+                int[] rgb = load(mapId);
+                if (rgb == null) return null;
+                byte[] pixels = new byte[rgb.length];
+                for (int i = 0; i < rgb.length; i++) pixels[i] = (byte) match.applyAsInt(rgb[i]);
+                return pixels;
+            } catch (IOException failure) {
+                onFailure.accept(failure);
+                return null;
+            }
+        };
     }
 
     List<Integer> ids() throws IOException {

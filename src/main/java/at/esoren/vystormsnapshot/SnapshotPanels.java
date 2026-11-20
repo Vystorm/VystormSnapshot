@@ -7,6 +7,8 @@ import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import static at.esoren.vystormsnapshot.SnapshotPanel.*;
 
 /** Server-thread adapter: only server-owned requests, current data and checked service calls. */
@@ -27,6 +29,11 @@ final class SnapshotPanels {
         String selected, world, query, targetName;
         UUID target;
         boolean top;
+        /**
+         * The hotbar slot the player held when this screen opened, -1 if unknown. A Core screen selects an empty slot
+         * while it is open (it hides the first-person hand), so clicks must not read the main hand.
+         */
+        int slot = -1;
     }
 
     SnapshotPanels(SnapshotPlugin plugin, API core, Lang lang, Album album, Gallery gallery, PhotoContest contest, CollectionsMenu collections) {
@@ -43,20 +50,44 @@ final class SnapshotPanels {
     boolean open(Player p, String name, int page, String world, String query, UUID target, String targetName, boolean top) {
         State s = new State(); s.page = Math.max(0, page); s.world = world; s.query = query;
         s.target = target; s.targetName = targetName; s.top = top;
-        states.computeIfAbsent(p.getUniqueId(), id -> new HashMap<>()).put(name, s);
+        Map<String, State> mine = states.computeIfAbsent(p.getUniqueId(), id -> new HashMap<>());
+        s.slot = openSlot(p, mine.values());
+        mine.put(name, s);
         if (!allowed(p, name)) return false;
         return panels.open(p, name) != PanelOpenResult.NONE;
     }
 
     void forget(UUID player) { states.remove(player); }
     private State state(Player p, String name) { return states.computeIfAbsent(p.getUniqueId(), id -> new HashMap<>()).computeIfAbsent(name, id -> new State()); }
+    /**
+     * The slot the player really holds. Opened from the world that is the selected slot. Opened from another Core
+     * screen (the hand is hidden there: an empty selected slot and an invisible player) it is the slot that screen was
+     * opened with.
+     */
+    static int openSlot(Player p, Collection<State> earlier) {
+        PlayerInventory inventory = p.getInventory();
+        if (inventory == null) return -1;
+        int selected = inventory.getHeldItemSlot();
+        ItemStack item = inventory.getItem(selected);
+        if ((item == null || item.getType() == Material.AIR) && p.isInvisible())
+            for (State before : earlier) if (before.slot >= 0 && before.slot != selected) return before.slot;
+        return selected;
+    }
+
+    /** The item in the slot the screen was opened with (the main hand if unknown). */
+    static ItemStack held(Player p, State s) {
+        PlayerInventory inventory = p.getInventory();
+        if (inventory == null) return null;
+        return s.slot >= 0 && s.slot < 9 ? inventory.getItem(s.slot) : inventory.getItemInMainHand();
+    }
+
     private boolean allowed(Player p, String name) {
         if (!plugin.isEnabled() || !p.isOnline() || !p.hasPermission("vystormsnapshot.use")) return false;
         State s = state(p, name);
         if (!SnapshotPlugin.enabled(plugin, Feature.CAMERA)) return false;
         if (name.startsWith("collection") || name.equals("sharing")) { if (!SnapshotPlugin.enabled(plugin, Feature.COLLECTIONS)) return false; }
         return switch (name) {
-            case "camera" -> SnapshotPlugin.enabled(plugin, Feature.CAMERA_MENU) && plugin.isCamera(p.getInventory().getItemInMainHand());
+            case "camera" -> SnapshotPlugin.enabled(plugin, Feature.CAMERA_MENU) && plugin.isCamera(held(p, s));
             case "album" -> SnapshotPlugin.enabled(plugin, Feature.ALBUM);
             case "gallery" -> plugin.galleryOn(p);
             case "contest", "contest-picker" -> plugin.contestEnabled() && contest.running(System.currentTimeMillis());
@@ -107,15 +138,15 @@ final class SnapshotPanels {
         switch (name) {
             case "camera" -> {
                 icon = Material.SPYGLASS; subtitle = ctx.text("commands.snapshot.sub.camera.description");
-                var camera = p.getInventory().getItemInMainHand();
+                var camera = held(p, s);
                 choices.add(new Choice("style", ctx.text("panel.style"), plugin.styleOf(camera).id,
-                        plugin.styles().stream().map(v -> new Option(v.id, ctx.text("style-" + v.id))).toList()));
-                choices.add(new Choice("format", ctx.text("panel.format"), plugin.formatOf(camera),
-                        plugin.formats().stream().map(v -> new Option(v, v)).toList()));
-                choices.add(new Choice("frame", ctx.text("panel.frame"), plugin.frameOf(camera).id,
-                        plugin.frames().stream().map(v -> new Option(v.id, ctx.text("frame-" + v.id))).toList()));
+                        plugin.styles().stream().map(v -> new Option(v.id, ctx.text("style-" + v.id))).toList(), ctx.text("panel.style-desc")));
+                choices.add(new Choice("format", ctx.text("panel.format-name"), plugin.formatOf(camera),
+                        plugin.formats().stream().map(v -> new Option(v, v)).toList(), ctx.text("panel.format-desc")));
+                choices.add(new Choice("frame", ctx.text("panel.frame-name"), plugin.frameOf(camera).id,
+                        plugin.frames().stream().map(v -> new Option(v.id, ctx.text("frame-" + v.id))).toList(), ctx.text("panel.frame-desc")));
                 choices.add(new Choice("timer", ctx.text("panel.timer"), Integer.toString(plugin.timerOf(camera)),
-                        plugin.timers().stream().map(v -> new Option(v.toString(), v == 0 ? ctx.text("camera-menu-timer-off") : ctx.text("camera-menu-timer", "seconds", v))).toList()));
+                        plugin.timers().stream().map(v -> new Option(v.toString(), v == 0 ? ctx.text("camera-menu-timer-off") : ctx.text("camera-menu-timer", "seconds", v))).toList(), ctx.text("panel.timer-desc")));
             }
             case "album" -> {
                 subtitle = s.world == null ? ctx.text("menu-album-desc") : s.world;
@@ -238,8 +269,11 @@ final class SnapshotPanels {
                     case "format" -> plugin.formats().contains(value);
                     default -> plugin.timers().stream().anyMatch(v -> v.toString().equals(value));
                 };
-                if (!valid || !plugin.isCamera(p.getInventory().getItemInMainHand())) return Result.error(lang.plain(p, "hold-camera"));
-                plugin.cameraSetting(p, action + ":" + value, false); s.selected = "tab-" + action; return Result.ok();
+                ItemStack camera = held(p, s);
+                if (!valid || !plugin.isCamera(camera)) return Result.error(lang.plain(p, "hold-camera"));
+                plugin.cameraSetting(p, camera, action + ":" + value, false);
+                if (s.slot >= 0 && s.slot < 9) p.getInventory().setItem(s.slot, camera);
+                s.selected = "tab-" + action; return Result.ok();
             }
             case "album" -> { plugin.openAlbum(p, 0); return Result.ok(); }
             case "gallery" -> { plugin.openGallery(p, 0, false, null, null); return Result.ok(); }
@@ -297,7 +331,7 @@ final class SnapshotPanels {
                 return result(p, result);
             }
             case "revoke" -> { return result(p, collections.data.share(p.getUniqueId(), c.id(), UUID.fromString(value), false)); }
-            case "add-held" -> collections.addHeld(p, c.id());
+            case "add-held" -> collections.addHeld(p, c.id(), held(p, s));
             case "sharing" -> collections.sharing(p, c.id());
             case "rename" -> collections.prompt(p, "title-prompt", c.title(), text -> { send(p, collections.data.title(p.getUniqueId(), c.id(), text)); collections.open(p, c.id(), 0); });
             case "share" -> collections.prompt(p, "player-prompt", "", text -> {

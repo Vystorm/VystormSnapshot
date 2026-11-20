@@ -179,6 +179,20 @@ class SwitchesTest {
         verify(lang(admin)).send(console, "feature-off");
     }
 
+    @Test void givenAlbumOff_whenCaptionSearchRuns_thenTheAnswerNamesTheSwitchAndTheCommandStaysListed() throws Exception {
+        SnapshotPlugin snapshot = plugin(Feature.ALBUM);
+        Player player = mock(Player.class);
+        when(lang(snapshot).plain(player, Feature.ALBUM.label())).thenReturn("Album");
+        snapshot.openAlbum(player, 0, null, "beach");
+        verify(lang(snapshot)).send(player, "feature-needs", "switch", "album.enabled", "name", "Album");
+        verify(player, never()).getInventory();
+        CommandSpec tree = SnapshotPlugin.commandSpec(snapshot);
+        assertTrue(tree.children().get("search").visibleTo(null));
+        assertFalse(tree.children().get("album").visibleTo(null));
+        for (String code : List.of("en", "de", "fr", "it", "pt_br", "ru", "zh_cn"))
+            assertTrue(YamlConfiguration.loadConfiguration(new java.io.File("src/main/resources/lang/" + code + ".yml")).getString("feature-needs", "").matches("(?s).*\\{name}.*\\{switch}.*"), code);
+    }
+
     @Test void givenAllOn_whenACaptionIsSet_thenItLooksAtTheHeldPhoto() throws Exception {
         SnapshotPlugin snapshot = plugin();
         Player player = mock(Player.class, RETURNS_DEEP_STUBS);

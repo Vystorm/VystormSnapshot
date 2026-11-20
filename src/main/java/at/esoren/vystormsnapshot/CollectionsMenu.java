@@ -141,9 +141,10 @@ final class CollectionsMenu implements Listener {
         core.dialogs().confirm(plugin, p, lang.ref("collections.delete"), lang.ref("collections.delete-confirm"),
                 () -> { if (allowed(p)) { result(p, data.delete(p.getUniqueId(), id)); list(p, 0); } }, () -> {}, this::allowed);
     }
-    void addHeld(Player p, UUID id) {
-        ItemStack held = p.getInventory().getItemInMainHand();
-        if (!(held.getItemMeta() instanceof MapMeta map) || !map.hasMapView() || map.getMapView() == null) { result(p, PhotoCollections.Result.INVALID); return; }
+    void addHeld(Player p, UUID id) { addHeld(p, id, p.getInventory().getItemInMainHand()); }
+    /** Adds the given photo; a Core screen passes the item of the slot it was opened with (it hides the hand). */
+    void addHeld(Player p, UUID id, ItemStack held) {
+        if (held == null || !(held.getItemMeta() instanceof MapMeta map) || !map.hasMapView() || map.getMapView() == null) { result(p, PhotoCollections.Result.INVALID); return; }
         int first = plugin.photoSet(map.getMapView().getId()).getFirst(); var photo = plugin.albumEntry(first);
         if (photo == null) { result(p, PhotoCollections.Result.MISSING); return; }
         result(p, data.photo(p.getUniqueId(), id, first, photo.photographer(), true));

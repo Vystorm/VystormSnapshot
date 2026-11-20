@@ -54,6 +54,9 @@ enum Feature {
     /** Language key of the one-line description. */
     String description() { return "switches." + name().toLowerCase(Locale.ROOT).replace('_', '-'); }
 
+    /** Language key of the readable name shown in {@code /vadmin features}. */
+    String label() { return "switch-names." + name().toLowerCase(Locale.ROOT).replace('_', '-'); }
+
     /** Applies only after a server restart. */
     boolean needsRestart() { return this == TUTORIAL; }
 

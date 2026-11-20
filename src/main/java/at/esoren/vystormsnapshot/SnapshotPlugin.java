@@ -94,7 +94,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     private Feature.Switches switches;
 
     /** Minimum Vystorm Core: placeholders through api.placeholders(). */
-    static final String MIN_CORE = "0.65.0";
+    static final String MIN_CORE = "0.66.0";
 
     /** Whether a feature (and camera.enabled) is on; static so menus and mocked plugins in tests read the real field. */
     static boolean enabled(SnapshotPlugin plugin, Feature feature) {
@@ -112,6 +112,13 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             return true;
         }
         return false;
+    }
+
+    /** True (and the switch named) when a feature this one depends on is switched off. */
+    private boolean needs(CommandSender sender, Feature needed) {
+        if (on(needed)) return false;
+        lang.send(sender, "feature-needs", "switch", needed.path, "name", lang.plain(sender, needed.label()));
+        return true;
     }
 
     @Override
@@ -193,11 +200,13 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     /** Every switch in /vadmin features with its one-line description in the admin's language. */
-    private void declareSwitches() {
-        var config = core.settings().config();
+    private void declareSwitches() { declareSwitches(core.settings().config(), this, lang); }
+
+    /** What Core receives for {@code /vadmin features} (FeatureLabelsTest runs exactly this). */
+    static void declareSwitches(Vystorm.vystorm_core._uiMethods.settings.ConfigEditorInterface config, org.bukkit.plugin.Plugin plugin, Lang lang) {
         for (Feature feature : Feature.values()) {
-            config.feature(this, feature.path, null, lang.ref(feature.description()));
-            if (feature.needsRestart()) config.activation(this, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
+            config.feature(plugin, feature.path, lang.ref(feature.label()), lang.ref(feature.description()));
+            if (feature.needsRestart()) config.activation(plugin, feature.path, Vystorm.vystorm_core._uiMethods.settings.SettingPolicy.Activation.RESTART);
         }
     }
 
@@ -247,12 +256,26 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         if (panelMenus != null) panelMenus.forget(event.getPlayer().getUniqueId());
     }
 
-    private void load() {
-        reloadConfig();
+    /**
+     * Start and reload read config.yml through here. A file with a YAML error is never saved over: it is reported and
+     * left as it is (jar defaults at start, the last good settings on a reload). Returns the problem or null.
+     */
+    static String readConfig(org.bukkit.plugin.java.JavaPlugin plugin, boolean reload) {
+        String problem = YamlCheck.readConfig(plugin, reload);
+        if (problem == null && captionDefaults(plugin.getConfig())) plugin.saveConfig();
+        return problem;
+    }
+
+    /** True once config.yml was applied; a later broken file then keeps these settings. */
+    private boolean configLoaded;
+
+    private String load() {
+        String problem = readConfig(this, configLoaded);
+        if (problem != null && configLoaded) return problem;
+        configLoaded = true;
         Feature.Switches before = switches;
         switches = Feature.Switches.read(getConfig());
         loadTextures();
-        if (captionDefaults(getConfig())) saveConfig();
         captionMax = Math.clamp(getConfig().getInt("captions.max-length", 80), 1, 200);
         if (lang != null) lang.reload();
         Material material = core.compat().server().material(getConfig().getString("camera.material", "SPYGLASS"), Material.SPYGLASS);
@@ -306,6 +329,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             try { core.command().refresh(); }
             catch (RuntimeException failure) { getLogger().log(Level.WARNING, "Command list not sent again", failure); }
         }
+        return problem;
     }
 
     private void loadTextures() {
@@ -421,9 +445,16 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     void cameraSetting(Player player, String setting) { cameraSetting(player, setting, true); }
 
     void cameraSetting(Player player, String setting, boolean reopen) {
+        cameraSetting(player, player.getInventory().getItemInMainHand(), setting, reopen);
+    }
+
+    /**
+     * {@code camera} is the item to change: the main hand for the chest menu, the slot a Core screen was opened with
+     * for the screen (a Core screen hides the hand by selecting an empty slot while it is open).
+     */
+    void cameraSetting(Player player, ItemStack camera, String setting, boolean reopen) {
         if (setting.equals("album")) { openAlbum(player, 0); return; }
         if (setting.equals("gallery")) { if (galleryOn(player)) openGallery(player, 0, false, null, null); return; }
-        ItemStack camera = player.getInventory().getItemInMainHand();
         if (!isCamera(camera)) { player.closeInventory(); lang.send(player, "hold-camera"); return; }
         String[] parts = setting.split(":", 2);
         if (parts[0].equals("timer")) {
@@ -669,8 +700,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void openAlbum(Player player, int page, String world, String query) {
-        if (off(player, Feature.ALBUM)) return;
-        if (query != null && off(player, Feature.SEARCH)) return;
+        if (query != null ? off(player, Feature.SEARCH) || needs(player, Feature.ALBUM) : off(player, Feature.ALBUM)) return;
         if (openPanel(player, "album", page, world, query, null, null, false)) return;
         openAlbumChest(player, page, world, query);
     }
@@ -975,7 +1005,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
                 .executes(ctx -> { if (ctx.sender() instanceof org.bukkit.entity.Player player) p.openAlbum(player, 0); else ctx.sender().sendMessage("/snapshot help"); })
                 .sub("albums", s -> gate(s, p, Feature.COLLECTIONS).playerOnly().arg(Arg.greedy("action").optional().suggests((ctx, prefix) -> CollectionsMenu.suggestActions(prefix)))
                         .executes(ctx -> { if (!p.off(ctx.player(), Feature.COLLECTIONS)) p.collections.command(ctx.player(), ctx.get("action")); }))
-                .sub("search", s -> gate(gate(s, p, Feature.ALBUM), p, Feature.SEARCH).playerOnly().arg(Arg.greedy("text"))
+                // listed while caption search is on, so that with the album off it can say which switch it needs
+                .sub("search", s -> gate(s, p, Feature.SEARCH).playerOnly().arg(Arg.greedy("text"))
                         .executes(ctx -> p.openAlbum(ctx.player(), 0, null, ctx.get("text"))))
                 .sub("album", s -> gate(s, p, Feature.ALBUM).playerOnly().arg(Arg.word("world").optional().suggests((ctx, prefix) -> p.albumWorlds(ctx.player())))
                         .executes(ctx -> {
@@ -1024,8 +1055,9 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void reload(CommandSender sender) {
-        load();
-        lang.send(sender, "reloaded");
+        String problem = load();
+        if (problem != null) lang.send(sender, "config-error", "problem", problem);
+        else lang.send(sender, "reloaded");
     }
 
     /** {@code /snapshot gallery [player]}: everyone's photos, or one photographer's. */

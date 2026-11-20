@@ -171,6 +171,56 @@ class SnapshotPanelsTest {
         assertTrue(data.get(c.id()).readers().contains(reader.getUniqueId()));
     }
 
+    /** A hotbar of mocked items; {@code selected[0]} is the selected slot, changed the way Core's screen hides the hand. */
+    private static org.bukkit.inventory.ItemStack[] hotbar(Player p, int[] selected) {
+        var items = new org.bukkit.inventory.ItemStack[9];
+        for (int i = 0; i < 9; i++) { items[i] = mock(org.bukkit.inventory.ItemStack.class); when(items[i].getType()).thenReturn(org.bukkit.Material.AIR); }
+        PlayerInventory inventory = p.getInventory();
+        when(inventory.getHeldItemSlot()).thenAnswer(call -> selected[0]);
+        when(inventory.getItem(anyInt())).thenAnswer(call -> items[(int) call.getArgument(0)]);
+        when(inventory.getItemInMainHand()).thenAnswer(call -> items[selected[0]]);
+        return items;
+    }
+
+    /** Core's PINNED screen selects an empty slot and makes the player invisible while it is open. */
+    private static void screenHidesHand(Player p, int[] selected, int empty) {
+        selected[0] = empty; when(p.isInvisible()).thenReturn(true);
+    }
+
+    @Test void givenCameraMenuOpenedWithCameraInHand_whenScreenHidesTheHand_thenSettingsStillChangeThatCamera() {
+        int[] selected = {2}; var items = hotbar(owner, selected);
+        var camera = mock(org.bukkit.inventory.ItemStack.class); when(camera.getType()).thenReturn(org.bukkit.Material.SPYGLASS); items[2] = camera;
+        when(plugin.isCamera(any())).thenAnswer(call -> call.getArgument(0) == camera);
+        when(plugin.styles()).thenReturn(List.of(Style.COLOR, Style.SEPIA)); when(plugin.styleOf(any())).thenReturn(Style.COLOR);
+        when(plugin.formats()).thenReturn(List.of("1x1")); when(plugin.formatOf(any())).thenReturn("1x1");
+        when(plugin.frames()).thenReturn(List.of(Style.Frame.NONE)); when(plugin.frameOf(any())).thenReturn(Style.Frame.NONE);
+        when(plugin.timers()).thenReturn(List.of(0));
+        when(plugin.getConfig()).thenReturn(new org.bukkit.configuration.file.YamlConfiguration());
+        assertTrue(screens.open(owner, "camera", 0, null, null, null, null, false));
+        screenHidesHand(owner, selected, 5);
+        assertTrue(registered.get("camera").access().test(owner), "the open camera menu must stay allowed");
+        var result = screens.run(owner, "camera", "style", "sepia");
+        assertTrue(result.success(), "camera setting refused while the screen hides the hand");
+        verify(plugin).cameraSetting(eq(owner), same(camera), eq("style:sepia"), eq(false));
+        verify(plugin, never()).cameraSetting(eq(owner), org.mockito.AdditionalMatchers.not(same(camera)), anyString(), anyBoolean());
+    }
+
+    @Test void givenCollectionOpenedFromTheListScreen_whenAddHeldClicked_thenThePhotoHeldBeforeTheScreensIsAdded() {
+        photo(1, owner); when(plugin.photoSet(1)).thenReturn(List.of(1));
+        data.create(owner.getUniqueId(), "holiday"); var c = data.own(owner.getUniqueId(), "holiday");
+        int[] selected = {1}; var items = hotbar(owner, selected);
+        var photoItem = mock(org.bukkit.inventory.ItemStack.class); when(photoItem.getType()).thenReturn(org.bukkit.Material.FILLED_MAP);
+        var meta = mock(org.bukkit.inventory.meta.MapMeta.class); var view = mock(org.bukkit.map.MapView.class);
+        when(photoItem.getItemMeta()).thenReturn(meta); when(meta.hasMapView()).thenReturn(true); when(meta.getMapView()).thenReturn(view); when(view.getId()).thenReturn(1);
+        items[1] = photoItem;
+        assertTrue(screens.open(owner, "collections", 0, null, null, null, null, false));
+        screenHidesHand(owner, selected, 6);
+        // "open-collection" in the list screen opens the collection screen while the hand is still hidden
+        assertTrue(screens.open(owner, "collection", 0, null, null, c.id(), null, false));
+            screens.run(owner, "collection", "add-held", c.id().toString());
+        assertEquals(List.of(1), List.copyOf(data.get(c.id()).photos()), "the photo held before the screens opened is added");
+    }
+
     @Test void givenCamera_whenRendered_thenAllSettingsAppearAndRemovedOptionsAreRejected() throws Exception {
         when(plugin.isCamera(any())).thenReturn(true);
         when(plugin.styles()).thenReturn(List.of(Style.COLOR, Style.SEPIA)); when(plugin.styleOf(any())).thenReturn(Style.COLOR);
@@ -182,7 +232,7 @@ class SnapshotPanelsTest {
         when(plugin.styles()).thenReturn(List.of(Style.COLOR));
         assertFalse(screens.run(owner, "camera", "style", "sepia").success());
         assertTrue(screens.run(owner, "camera", "style", "color").success());
-        verify(plugin).cameraSetting(owner, "style:color", false);
-        verify(plugin, never()).cameraSetting(owner, "style:sepia", false);
+        verify(plugin).cameraSetting(eq(owner), any(), eq("style:color"), eq(false));
+        verify(plugin, never()).cameraSetting(eq(owner), any(), eq("style:sepia"), anyBoolean());
     }
 }

@@ -11,7 +11,10 @@ final class SnapshotPanel {
     record Row(String id, String title, String subtitle, Material icon, List<Stat> stats, List<Button> buttons) {}
     record Stat(String label, String value) {}
     record Option(String id, String label) {}
-    record Choice(String id, String label, String selected, List<Option> options) {}
+    /** One camera setting; {@code description} is the line under its name in the settings list. */
+    record Choice(String id, String label, String selected, List<Option> options, String description) {
+        Choice(String id, String label, String selected, List<Option> options) { this(id, label, selected, options, ""); }
+    }
     record View(String title, String subtitle, Material icon, List<Row> rows, String selected,
                 int page, int pages, String search, List<Choice> choices, List<Button> footer) {}
     interface Actions { Result run(Player player, String action, String value); }
@@ -22,15 +25,16 @@ final class SnapshotPanel {
         if (view.search() != null) panel.child(Ui.input("search", ctx.text("panel.search")).value(view.search()).maxLength(200)
                 .search((a, value) -> change(a, actions, "search", value)));
         if (!view.choices().isEmpty()) {
-            Ui.Tabs tabs = Ui.tabs("settings").onTab((a, value) -> change(a, actions, "tab", value));
+            // camera settings: one row each on Vystorm Screens (Core 0.66.0 list layout)
+            Ui.Section settings = Ui.section(ctx.text("panel.camera-settings")).list().id("settings");
             for (Choice choice : view.choices()) {
                 Ui.Select select = Ui.select(choice.id(), choice.label()).value(choice.selected())
                         .onChange((a, value) -> change(a, actions, choice.id(), value));
                 for (Option option : choice.options()) select.option(option.id(), option.label());
-                tabs.tab("tab-" + choice.id(), choice.label(), select);
+                if (!choice.description().isBlank()) select.tooltip(choice.description());
+                settings.child(select);
             }
-            if (view.selected() != null) tabs.select(view.selected());
-            panel.child(tabs);
+            panel.child(settings);
         } else if (view.rows().isEmpty()) panel.child(Ui.text(ctx.text("panel.empty")).id("empty"));
         else {
             Row chosen = view.rows().stream().filter(r -> r.id().equals(view.selected())).findFirst().orElse(view.rows().getFirst());

@@ -1,3 +1,13 @@
+## 1.20.0 — 2026-11-20
+
+- Fixed: a `config.yml` with a YAML mistake is no longer overwritten. The plugin leaves the file as it is, names the line and column of the mistake in the console and in the answer of `/snapshot reload`, and keeps the last working settings (at start: the default settings) until you fix it.
+- `/vadmin features` shows every switch of the plugin with a readable name in the admin's language, for example "Player skins" and "Camera menu on the F key", instead of a name built from the config key such as "Rendering › Player skins".
+- `/snapshot search` with `album.enabled` off stays in help and tab completion and answers "This needs “Album” (album.enabled), which is switched off on this server." Before, it disappeared and typing it gave "unknown subcommand".
+- The camera menu shows the camera settings as a list on Vystorm Screens: "Film style", "Photo size in maps", "Frame around the photo" and "Self-timer" each stand on one row with the chosen value on the right and a one-line description below, in all seven languages. A click picks the next value, a right click the previous one. Before, every setting had its own tab. Players without screens see the menu as before.
+- Fixed: on Vystorm Screens a click on a camera setting ("Photo size in maps", "Film style" ...) answered "You lack permission for this." The screen hides your hand while it is open, so the plugin now changes the camera you held when you opened the menu. "Add the photo in your main hand" in a collection uses the photo you held when you opened the screens, too.
+- README: names the platforms the plugin was tested on (Paper and Purpur 26.2, Paper 1.20.6, Spigot 26.2).
+- Requires Vystorm Core 0.66.0 or newer. Update Core before you update this plugin.
+
 ## 1.19.0 — 2026-11-18
 
 - Requires Vystorm Core 0.65.0 or newer. Update Core before you update this plugin.

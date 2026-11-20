@@ -15,7 +15,8 @@
 - Photos remember where they were taken (coordinates and compass direction in the lore).
 - `/snapshot capture <world> <x> <y> <z> <yaw> <pitch>`: admins and the console take photos from any position (spawn boards, news, events).
 - Texts in seven languages (`lang/en.yml`, `de`, `fr`, `it`, `pt_br`, `ru` and `zh_cn`) through the Vystorm Core language system (player language, `/vadmin language audit`); `config.yml` is editable in game with `/vadmin config`.
-- Needs [Vystorm Core](https://www.spigotmc.org/resources/139848/) 0.65.0 or newer (free). What the build checks: Java 21 bytecode (`--release 21`), compiled against the Paper API 1.21.11 and, in `compat1206` and `compat1206Test`, against Paper 1.20.6. Use the Java version your server needs.
+- Needs [Vystorm Core](https://www.spigotmc.org/resources/139848/) 0.66.0 or newer (free). What the build checks: Java 21 bytecode (`--release 21`), compiled against the Paper API 1.21.11 and, in `compat1206` and `compat1206Test`, against Paper 1.20.6. Use the Java version your server needs.
+- Tested on Paper and Purpur 26.2, Paper 1.20.6 and Spigot 26.2.
 
 ## Photo contest (1.15.0)
 
@@ -91,7 +92,7 @@ Show your best photos to the whole server:
 
 ## Switches
 
-Every feature has an on/off switch in `config.yml` (all on by default, listed in Vystorm Core's `/vadmin features`, applied without a restart except `tutorial.enabled`): `camera.enabled` (the whole plugin), `camera.craftable`, `film-cost.enabled`, `saved-photos.enabled`, `big-photos.enabled`, `camera-menu.enabled`, `camera.menu-key`, `film-styles.enabled`, `photo-frames.enabled`, `self-timer.enabled`, `telephoto.enabled`, `selfie`, `flash.enabled`, `show-location`, `block-textures.enabled`, `rendering.player-skins`, `album.enabled`, `caption-search.enabled`, `captions.enabled`, `collections.enabled`, `gallery.enabled`, `gallery.prints`, `postcards.enabled`, `contest.enabled`, `admin-photos.enabled`, `tutorial.enabled`. A switched-off feature answers "This feature is switched off on this server."; photos, albums, captions, collections, the gallery, postcards and contests stay saved.
+Every feature has an on/off switch in `config.yml` (all on by default, listed in Vystorm Core's `/vadmin features`, applied without a restart except `tutorial.enabled`): `camera.enabled` (the whole plugin), `camera.craftable`, `film-cost.enabled`, `saved-photos.enabled`, `big-photos.enabled`, `camera-menu.enabled`, `camera.menu-key`, `film-styles.enabled`, `photo-frames.enabled`, `self-timer.enabled`, `telephoto.enabled`, `selfie`, `flash.enabled`, `show-location`, `block-textures.enabled`, `rendering.player-skins`, `album.enabled`, `caption-search.enabled`, `captions.enabled`, `collections.enabled`, `gallery.enabled`, `gallery.prints`, `postcards.enabled`, `contest.enabled`, `admin-photos.enabled`, `tutorial.enabled`. A switched-off feature answers "This feature is switched off on this server."; `/snapshot search` with `album.enabled` off names that switch; photos, albums, captions, collections, the gallery, postcards and contests stay saved.
 
 ## Placeholders
 
@@ -121,7 +122,7 @@ gallery:
 
 All Snapshot features remain available on Paper 1.20.6, including the chest menus, photos, captions and gallery. The flash uses the uncoloured particle on older servers. Materials configured as the camera that do not exist on the server fall back to the spyglass, and unavailable film materials to paper (only `none` makes photos free); newer mobs and blocks naturally appear only on servers that provide them. Core's inventory adapter detects the runtime API shape without parsing server versions.
 
-Build with JDK 25 and `-PvystormCoreJar=<path-to-Core-0.65.0-or-newer.jar>`; all Java sources target release 21. `check` includes `compat1206` (compiles main sources against only the old API and its libraries plus Core) and `compat1206Test` (runs the compatibility tests against those libraries using the shipped main classes). Set `-Ppaper1206Libraries=<libraries-directory>` to override the default `<home>/source/tools/smoke-1206/libraries`. These checks use local jars and work offline once the normal build dependencies are cached.
+Build with JDK 25 and `-PvystormCoreJar=<path-to-Core-0.66.0-or-newer.jar>`; all Java sources target release 21. `check` includes `compat1206` (compiles main sources against only the old API and its libraries plus Core) and `compat1206Test` (runs the compatibility tests against those libraries using the shipped main classes). Set `-Ppaper1206Libraries=<libraries-directory>` to override the default `<home>/source/tools/smoke-1206/libraries`. These checks use local jars and work offline once the normal build dependencies are cached.
 
 ## Private photo collections
 

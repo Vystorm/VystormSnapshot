@@ -513,7 +513,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         if (!(held.getItemMeta() instanceof MapMeta meta) || !meta.hasMapView() || meta.getMapView() == null || album.entry(meta.getMapView().getId()) == null) {
             lang.send(sender, "postcard.no-photo"); return;
         }
-        org.bukkit.OfflinePlayer target = to == null ? null : Bukkit.getOfflinePlayerIfCached(to);
+        // Core's platform part: Bukkit.getOfflinePlayerIfCached is Paper API, Spigot has no such method
+        org.bukkit.OfflinePlayer target = to == null ? null : core.compat().platform().getOfflinePlayerIfCached(to);
         if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) { lang.send(sender, "postcard.unknown", "player", to == null ? "?" : to); return; }
         if (target.getUniqueId().equals(sender.getUniqueId())) { lang.send(sender, "postcard.self"); return; }
         String text = Postcards.clean(greeting);

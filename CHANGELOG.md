@@ -1,3 +1,7 @@
+## 1.20.2 — 2026-11-21
+
+- Fixed on Spigot: `/snapshot postcard <player>` failed with an internal error (NoSuchMethodError in the console) and sent nothing. It looked the player up with a Paper-only method that Spigot does not have. The lookup now goes through Vystorm Core, which works on Spigot too. Broken on Spigot since postcards came in with 1.16.0; Paper and Purpur were not affected.
+
 ## 1.20.1 — 2026-11-20
 
 - Faster start on servers with many photos: the plugin no longer reads and decodes every PNG in `photos/` when the server starts. A photo is read the first time a player sees its map after a restart.

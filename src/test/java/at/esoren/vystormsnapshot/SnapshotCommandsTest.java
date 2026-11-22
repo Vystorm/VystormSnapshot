@@ -66,7 +66,7 @@ class SnapshotCommandsTest {
         CommandRegistration r = registration(null);
         String[] none = {""};
         assertEquals(List.of("albums", "search", "album", "camera", "contest", "gallery", "format", "caption", "help"), r.suggest(player(Locale.US, "vystormsnapshot.use"), "snapshot", none));
-        assertEquals(List.of("albums", "suchen", "album", "kamera", "contest", "galerie", "format", "beschriftung", "geben", "aufnehmen", "neuladen", "hilfe"),
+        assertEquals(List.of("albums", "suchen", "album", "kamera", "contest", "galerie", "format", "beschriftung", "geben", "aufnehmen", "status", "neuladen", "hilfe"),
                 r.suggest(player(Locale.GERMANY, "vystormsnapshot.use", "vystormsnapshot.admin"), "schnappschuss", none));
         assertEquals(List.of("albums", "搜索", "相册", "相机设置", "contest", "画廊", "格式", "说明", "帮助"), r.suggest(player(Locale.SIMPLIFIED_CHINESE, "vystormsnapshot.use"), "相机", none));
         assertEquals(List.of(), r.suggest(player(Locale.US), "snapshot", none), "without vystormsnapshot.use nothing");
@@ -187,6 +187,8 @@ class SnapshotCommandsTest {
         verify(p).capture(eq(console), aryEq(new String[]{"capture", "world", "0", "70", "0", "0", "0"}));
         r.execute(console, "snapshot", new String[]{"reload"});
         verify(p).reload(console);
+        r.execute(console, "snapshot", new String[]{"status"});
+        verify(p).status(console);
         r.execute(console, "snapshot", new String[]{"album"});
         assertEquals(List.of("Only players can do that."), chat);
     }

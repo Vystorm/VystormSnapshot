@@ -87,10 +87,12 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     private int galleryMax = 20;
     private int captionMax = 80;
     private SkinCache assets;
+    /** The opt-in download of the block textures from Mojang (rendering.vanilla-textures). */
+    private VanillaTextures vanilla;
     private volatile BlockTextures blockTextures = BlockTextures.EMPTY;
     private volatile long assetGeneration;
     private boolean playerSkins = true;
-    /** Every feature switch as read in load(); null (= all on) until then and in tests that build the plugin by hand. */
+    /** Every feature switch as read in load(); null (= every feature at its default) until then and in tests that build the plugin by hand. */
     private Feature.Switches switches;
 
     /** Minimum Vystorm Core: placeholders through api.placeholders(). */
@@ -99,7 +101,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     /** Whether a feature (and camera.enabled) is on; static so menus and mocked plugins in tests read the real field. */
     static boolean enabled(SnapshotPlugin plugin, Feature feature) {
         Feature.Switches current = plugin == null ? null : plugin.switches;
-        return current == null || current.on(feature);
+        return current == null ? feature.defaultOn : current.on(feature);
     }
 
     private boolean on(Feature feature) { return enabled(this, feature); }
@@ -146,7 +148,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         lang = core.lang().register(this);
         registerTutorial();
         collections = new CollectionsMenu(this, core, new PhotoCollections(getDataFolder().toPath().resolve("photos/collections.yml"), getLogger(), core.data().files()), lang);
-        assets=new SkinCache(core.compat().platform());
+        assets=new SkinCache(core.compat().platform(), getLogger());
+        vanilla = new VanillaTextures(getDataFolder().toPath().resolve("cache"), core.data().files(), getLogger());
         load();
         if(playerSkins) for(Player player:Bukkit.getOnlinePlayers())assets.request(player);
         getServer().getPluginManager().registerEvents(this, this);
@@ -175,6 +178,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         declareSwitches();
         try { registerPlaceholders(core.placeholders()); }
         catch (RuntimeException failure) { getLogger().log(Level.WARNING, "Placeholders not registered", failure); }
+        rankingsReady = true;
+        applyRankings();
         registerCommands();
         worker = core.tasks().of(this, "photo-developing").timer(1L, 1L, this::work);
         gallerySaver = core.tasks().of(this, "gallery-save").timer(200L, 200L, gallery::flush);
@@ -186,6 +191,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     public void onDisable() {
         assetGeneration++;
         if(assets!=null)assets.close();
+        if (vanilla != null) vanilla.close();
         if (worker != null) worker.cancel();
         if (gallerySaver != null) gallerySaver.cancel();
         if (gallery != null) gallery.flush();
@@ -231,6 +237,25 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
                 return last == null ? 0 : Math.max(0, cooldownMillis - (now - last));
             }
         }, key -> lang == null ? key : lang.ref(key));
+    }
+
+    /** True once onEnable reached the placeholders; a reload before that (the first load) declares nothing yet. */
+    private boolean rankingsReady;
+
+    /**
+     * {@code snapshot:photos} and {@code snapshot:likes} for Vystorm Boards and placeholders, only on a Core with the
+     * capability {@code placeholder-rankings} (0.67.0); on an older Core nothing happens and nothing else changes.
+     * Runs at start and after every reload, so {@code rankings.enabled}, {@code album.enabled} and
+     * {@code gallery.enabled} apply without a restart.
+     */
+    private void applyRankings() {
+        if (!rankingsReady || core == null) return;
+        boolean has;
+        try { has = CoreApi.has("placeholder-rankings"); } catch (RuntimeException | LinkageError old) { has = false; }
+        SnapshotPlaceholders.rankings(core.placeholders(), this, has, this::on, new SnapshotPlaceholders.RankingData() {
+            @Override public java.util.Collection<Album.Entry> albumEntries() { return album == null ? List.of() : album.all(); }
+            @Override public java.util.Collection<Gallery.Exhibit> exhibits() { return gallery == null || gallery.broken() != null ? List.of() : gallery.all(); }
+        }, key -> lang == null ? key : lang.ref(key), getLogger());
     }
 
     private void registerPanels() {
@@ -329,30 +354,130 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             try { core.command().refresh(); }
             catch (RuntimeException failure) { getLogger().log(Level.WARNING, "Command list not sent again", failure); }
         }
+        applyRankings();
         return problem;
     }
+
+    /** What {@code /snapshot status} says about the block textures. */
+    enum TextureState { OFF, MISSING, LOADING, LOADED, FAILED }
+
+    private volatile TextureState textureState = TextureState.OFF;
+    private volatile String textureProblem = "";
+    private volatile java.nio.file.Path texturePack;
+    /** Admins who already got the missing-textures hint since they joined. */
+    private final java.util.Set<UUID> textureHinted = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private void loadTextures() {
         playerSkins = on(Feature.SKINS);
         long generation = ++assetGeneration;
-        if (!on(Feature.TEXTURES)) { blockTextures = BlockTextures.EMPTY; return; } // block-textures.enabled off: map colours
-        var pack = getDataFolder().toPath().resolve(getConfig().getString("rendering.resource-pack", "textures.zip"));
-        if (!java.nio.file.Files.isRegularFile(pack)) {
+        textureHinted.clear();
+        if (!on(Feature.TEXTURES)) { // block-textures.enabled off: map colours
             blockTextures = BlockTextures.EMPTY;
-            getLogger().info("Camera texture pack missing: " + pack + "; using map colours until a pack is installed.");
+            textureState = TextureState.OFF;
+            startVanilla(null);
             return;
         }
-        assets.background(() -> {
+        var pack = getDataFolder().toPath().resolve(getConfig().getString("rendering.resource-pack", "textures.zip"));
+        texturePack = pack;
+        boolean fetching = startVanilla(pack);
+        if (!java.nio.file.Files.isRegularFile(pack)) {
+            blockTextures = BlockTextures.EMPTY;
+            textureState = TextureState.MISSING;
+            if (fetching) getLogger().info("Camera texture pack missing: " + pack + ". Photos use flat map colours until the download from Mojang"
+                    + " (rendering.vanilla-textures) has written it.");
+            else getLogger().warning("Camera texture pack missing: " + pack + ". Photos use flat map colours until you put a textures.zip"
+                    + " (assets/minecraft/textures/block, models/block, blockstates from a Minecraft client jar) there and run /snapshot reload,"
+                    + " or set rendering.vanilla-textures.download and rendering.vanilla-textures.accept-download to true to let the plugin"
+                    + " download them from Mojang.");
+            return;
+        }
+        if (textureState != TextureState.LOADED) textureState = TextureState.LOADING;
+        boolean queued = assets.background(() -> {
             try {
                 BlockTextures loaded = BlockTextures.load(pack);
                 if (generation == assetGeneration) {
                     blockTextures = loaded;
-                    getLogger().info("Camera textures loaded: " + loaded.size());
+                    textureState = loaded.size() > 0 ? TextureState.LOADED : TextureState.FAILED;
+                    textureProblem = loaded.size() > 0 ? "" : "no block textures inside (assets/minecraft/textures/block)";
+                    if (loaded.size() > 0) getLogger().info("Camera textures loaded: " + loaded.size());
+                    else getLogger().warning("Camera texture pack " + pack + " has no block textures in assets/minecraft/textures/block; photos use map colours.");
                 }
             } catch (IOException | RuntimeException failure) {
+                if (generation == assetGeneration) {
+                    textureState = TextureState.FAILED;
+                    textureProblem = String.valueOf(failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage());
+                }
                 getLogger().log(Level.WARNING, "Could not load camera textures; previous textures remain active", failure);
             }
         });
+        if (!queued) { textureState = TextureState.FAILED; textureProblem = "the loader is busy, run /snapshot reload again"; }
+    }
+
+    /**
+     * Starts the opt-in download from Mojang when both keys are true (it checks itself whether textures.zip is the
+     * plugin's own and up to date). A finished download loads the textures again on the server thread. {@code pack}
+     * null: block textures are off, so nothing is downloaded.
+     */
+    private boolean startVanilla(java.nio.file.Path pack) {
+        if (vanilla == null) return false;
+        var config = getConfig();
+        var settings = new VanillaTextures.Settings(pack != null && on(Feature.VANILLA_TEXTURES),
+                config.getBoolean("rendering.vanilla-textures.accept-download", false),
+                config.getString("rendering.vanilla-textures.version", VanillaTextures.AUTO),
+                VanillaTextures.minecraftVersion(Bukkit.getBukkitVersion()), pack);
+        return vanilla.start(settings, () -> {
+            try {
+                Bukkit.getScheduler().runTask(this, () -> { if (isEnabled()) loadTextures(); });
+            } catch (RuntimeException stopped) { /* plugin disabled meanwhile: the next start loads the zip */ }
+        });
+    }
+
+    /** The line about the download from Mojang in {@code /snapshot status}. */
+    private void vanillaStatus(CommandSender sender, String path) {
+        if (vanilla == null) return;
+        VanillaTextures.Status state = vanilla.status();
+        String version = String.valueOf(state.version());
+        switch (state.state()) {
+            case OFF -> lang.send(sender, "status.vanilla-off");
+            case CONSENT -> lang.send(sender, "status.vanilla-consent");
+            case OWN_FILE -> lang.send(sender, "status.vanilla-own-file", "path", path);
+            case CHECKING -> lang.send(sender, "status.vanilla-checking");
+            case DOWNLOADING -> lang.send(sender, "status.vanilla-downloading", "version", version, "percent", Integer.toString(state.percent()),
+                    "size", VanillaTextures.mb(state.size()));
+            case DONE -> lang.send(sender, "status.vanilla-done", "version", version,
+                    "date", state.date() == null ? "?" : state.date().substring(0, Math.min(10, state.date().length())));
+            case FAILED -> {
+                if (state.retryAt() > 0) lang.send(sender, "status.vanilla-retrying", "problem", String.valueOf(state.problem()),
+                        "time", SkinCache.duration(Math.max(0, state.retryAt() - System.currentTimeMillis())));
+                else lang.send(sender, "status.vanilla-failed", "problem", String.valueOf(state.problem()));
+            }
+        }
+    }
+
+    /** {@code /snapshot status}: block textures and player skins as the photos see them now. */
+    void status(CommandSender sender) {
+        lang.send(sender, "status.title");
+        String path = String.valueOf(texturePack == null ? getDataFolder().toPath().resolve("textures.zip") : texturePack);
+        switch (textureState) {
+            case OFF -> lang.send(sender, "status.textures-off");
+            case MISSING -> lang.send(sender, "status.textures-missing", "path", path);
+            case LOADING -> lang.send(sender, "status.textures-loading", "path", path);
+            case LOADED -> lang.send(sender, "status.textures-loaded", "count", Integer.toString(blockTextures.size()), "path", path);
+            case FAILED -> lang.send(sender, "status.textures-failed", "path", path, "problem", textureProblem,
+                    "count", Integer.toString(blockTextures.size()));
+        }
+        vanillaStatus(sender, path);
+        if (!playerSkins || assets == null) { lang.send(sender, "status.skins-off"); return; }
+        SkinCache.Status skins = assets.status();
+        if (skins.lastFailure() == null) lang.send(sender, "status.skins-on", "count", Integer.toString(skins.cached()));
+        else lang.send(sender, "status.skins-failure", "count", Integer.toString(skins.cached()), "waiting", Integer.toString(skins.waiting()),
+                "problem", skins.lastFailure(), "ago", SkinCache.duration(System.currentTimeMillis() - skins.lastFailureAt()));
+    }
+
+    /** Once per session: an admin who takes a photo while the textures are missing is told where the file goes. */
+    private void textureHint(Player player) {
+        if (textureState != TextureState.MISSING || !player.hasPermission("vystormsnapshot.admin") || !textureHinted.add(player.getUniqueId())) return;
+        lang.send(player, "status.textures-hint", "path", String.valueOf(texturePack));
     }
     static boolean captionDefaults(org.bukkit.configuration.file.FileConfiguration config) {
         if (config.contains("captions.max-length", true)) return false;
@@ -563,7 +688,10 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onSkinQuit(org.bukkit.event.player.PlayerQuitEvent event) {assets.forget(event.getPlayer().getUniqueId());}
+    public void onSkinQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        assets.forget(event.getPlayer().getUniqueId());
+        textureHinted.remove(event.getPlayer().getUniqueId());
+    }
 
     /**
      * Using the camera goes through Core's stages, so Core decides when it runs among all Vystorm plugins: it is the
@@ -671,6 +799,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
                 blockTextures,playerSkins?assets:null,
                 pixels -> deliver(photographer, name, world, where, pixels, tilesX, tilesY)));
         core.compat().platform().sendActionBar(player, lang.component(player, "developing"));
+        textureHint(player);
     }
 
     String formatOf(ItemStack camera) {
@@ -1041,6 +1170,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
                             if (ctx.get("format") != null) args.add(ctx.get("format"));
                             p.capture(ctx.sender(), args.toArray(String[]::new));
                         }))
+                .sub("status", s -> s.permission("vystormsnapshot.admin").executes(ctx -> p.status(ctx.sender())))
                 .sub("reload", s -> s.permission("vystormsnapshot.admin").executes(ctx -> p.reload(ctx.sender())))
                 .build();
     }
@@ -1055,6 +1185,8 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
 
     void reload(CommandSender sender) {
         String problem = load();
+        // skins that failed are asked again at once, cached ones fetched again (a player may have changed theirs)
+        if (playerSkins && assets != null) assets.refresh(Bukkit.getOnlinePlayers());
         if (problem != null) lang.send(sender, "config-error", "problem", problem);
         else lang.send(sender, "reloaded");
     }

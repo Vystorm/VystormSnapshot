@@ -61,6 +61,27 @@ final class SnapshotPlaceholders {
         return ns;
     }
 
+    /** What the rankings read, at call time (server thread, from memory). */
+    interface RankingData {
+        java.util.Collection<Album.Entry> albumEntries();
+        java.util.Collection<Gallery.Exhibit> exhibits();
+    }
+
+    /**
+     * Declares {@code snapshot:photos} (album on) and {@code snapshot:likes} (gallery on) while {@code rankings.enabled}
+     * is on, and removes them when a reload switched them off. {@code coreHasRankings} is
+     * {@code CoreApi.has("placeholder-rankings")}: without it nothing is declared and {@link SnapshotRankings}, the only
+     * class that mentions Core's ranking types, is never loaded. A refusal (another plugin owns the namespace, an older
+     * Core) is logged and the plugin keeps running.
+     */
+    static void rankings(PlaceholderInterface registry, Plugin owner, boolean coreHasRankings, java.util.function.Predicate<Feature> on,
+                         RankingData data, UnaryOperator<String> ref, java.util.logging.Logger logger) {
+        if (!coreHasRankings || registry == null) return;
+        boolean ranked = on.test(Feature.RANKINGS);
+        try { SnapshotRankings.apply(owner, registry, ranked && on.test(Feature.ALBUM), ranked && on.test(Feature.GALLERY), data, ref); }
+        catch (RuntimeException | LinkageError refused) { if (logger != null) logger.warning("Rankings not offered: " + refused); }
+    }
+
     private static boolean gallery(Source source) { return source.on(Feature.GALLERY) && source.gallery() != null; }
 
     private static boolean contest(Source source) { return source.on(Feature.CONTEST) && source.contest() != null; }

@@ -177,6 +177,10 @@ commands:
           yaw: YAW
           pitch: PITCH
           format: 宽x高
+      status:
+        name: "状态"
+        aliases: []
+        description: "方块材质和玩家皮肤：照片当前使用的内容"
       reload:
         name: 重载
         aliases: []
@@ -313,6 +317,7 @@ switches:
   show-location: "照片上的坐标和方向"
   textures: "来自 textures.zip 的真实方块材质"
   skins: "玩家人像上的真实皮肤"
+  vanilla-textures: "从 Mojang 下载一次方块材质（需要 rendering.vanilla-textures.accept-download）"
   album: "可重印的相册"
   search: "按说明搜索自己的照片"
   captions: "照片说明"
@@ -323,6 +328,7 @@ switches:
   contest: "带投票和奖励的摄影比赛"
   admin-photos: "管理员任意位置拍照和赠送相机"
   tutorial: "主菜单中的教程（需要重启）"
+  rankings: "Vystorm Boards 的照片和点赞排行榜（需要 Core 0.67.0 或更新版本）"
 placeholder:
   photos: "玩家相册中的照片数"
   gallery_shown: "玩家在画廊展示的照片数"
@@ -352,6 +358,7 @@ switch-names:
   show-location: "照片上的位置"
   textures: "方块材质"
   skins: "玩家皮肤"
+  vanilla-textures: "来自 Mojang 的方块材质"
   album: "相册"
   search: "按说明搜索"
   captions: "照片说明"
@@ -362,4 +369,31 @@ switch-names:
   contest: "摄影比赛"
   admin-photos: "管理员照片"
   tutorial: "教程"
+  rankings: "排行榜"
 config-error: "<red>config.yml 未加载：YAML 错误位于 {problem}。文件未被修改，仍使用上次有效的设置。"
+status:
+  title: "<gold>Vystorm Snapshot 状态"
+  textures-off: "<gray>方块材质：已关闭（block-textures.enabled: false）。照片使用地图颜色。"
+  textures-missing: "<yellow>方块材质：缺失。照片使用纯地图颜色。请把 textures.zip 放到 {path}（包含 Minecraft 客户端 jar 中的 assets/minecraft/textures/block、models/block 和 blockstates），然后执行 /snapshot reload。或者设置 rendering.vanilla-textures.download: true 和 rendering.vanilla-textures.accept-download: true，让插件从 Mojang 下载。"
+  textures-loading: "<gray>方块材质：正在从 {path} 加载 ..."
+  textures-loaded: "<green>方块材质：已从 {path} 加载 {count} 个。"
+  textures-failed: "<red>方块材质：无法使用 {path}（{problem}）。仍使用 {count} 个材质。"
+  skins-off: "<gray>玩家皮肤：已关闭（rendering.player-skins: false）。"
+  skins-on: "<green>玩家皮肤：已开启，缓存 {count} 个，没有失败。"
+  skins-failure: "<yellow>玩家皮肤：已开启，缓存 {count} 个，{waiting} 个等待重试。上次失败在 {ago} 前：{problem}"
+  textures-hint: "<yellow>管理员提示：这张照片使用纯地图颜色，因为方块材质缺失。请把 textures.zip 放到 {path}，然后执行 /snapshot reload。/snapshot status 显示当前状态。或者让插件从 Mojang 下载：rendering.vanilla-textures.download: true 和 rendering.vanilla-textures.accept-download: true。"
+  vanilla-off: "<gray>从 Mojang 下载：已关闭（rendering.vanilla-textures.download: false）。"
+  vanilla-consent: "<yellow>从 Mojang 下载：等待你的同意。已设置 rendering.vanilla-textures.download: true；设置 rendering.vanilla-textures.accept-download: true 表示你接受 Minecraft EULA（https://www.minecraft.net/eula），插件随后会下载一次客户端 jar。"
+  vanilla-own-file: "<gray>从 Mojang 下载：不需要，{path} 是你自己的文件，永远不会被替换。"
+  vanilla-checking: "<gray>从 Mojang 下载：正在检查 Mojang 的版本列表 ..."
+  vanilla-downloading: "<gray>从 Mojang 下载：Minecraft {version}，{size} 的 {percent} %。"
+  vanilla-done: "<green>从 Mojang 下载：已完成，Minecraft {version} 的材质，日期 {date}。"
+  vanilla-failed: "<red>从 Mojang 下载：失败：{problem}。在下次启动或 /snapshot reload 之前不再重试。"
+  vanilla-retrying: "<yellow>从 Mojang 下载：失败：{problem}。{time} 后重试。"
+rankings:
+  photos:
+    label: "拍摄的照片"
+    description: "玩家相册中的照片"
+  likes:
+    label: "画廊点赞"
+    description: "玩家在画廊展示的照片获得的点赞"

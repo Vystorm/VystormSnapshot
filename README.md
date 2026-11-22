@@ -43,11 +43,29 @@ Use `/snapshot album world_nether` to find your Nether photos, or choose a world
 
 ## Block textures and player skins (1.9.0)
 
-Camera photos can use Minecraft's actual block textures instead of flat map colours. Put your own vanilla client JAR or resource-pack ZIP at `plugins/VystormSnapshot/textures.zip`, then run `/snapshot reload`. The archive must contain `assets/minecraft/textures/block`, `models/block` and optionally `blockstates`. Set `rendering.resource-pack` for another path. Asset loading happens in the background; a missing pack falls back to map colours, and a failed reload retains the previous textures. No Minecraft assets are included in this plugin's JAR or Git repository.
+Camera photos can use Minecraft's actual block textures instead of flat map colours. The plugin ships no Minecraft assets, so a fresh install takes photos in map colours until you add them: put your own vanilla client JAR or resource-pack ZIP at `plugins/VystormSnapshot/textures.zip`, then run `/snapshot reload`. The archive must contain `assets/minecraft/textures/block`, `models/block` and optionally `blockstates` (a client JAR from `.minecraft/versions/<version>/` has all three; you can also zip just those folders). Set `rendering.resource-pack` for another path. Loading happens in the background and the console says "Camera textures loaded: N". Without the file the console warns at every start, and an admin who takes a photo gets one hint per session with the exact path. A file that cannot be read keeps the previous textures and is named in the console. No Minecraft assets are included in this plugin's JAR or Git repository.
+
+### Let the plugin fetch the textures from Mojang (1.21.0)
+
+Instead of building `textures.zip` yourself, you can let the plugin download it. This is off by default and needs two keys in `config.yml`:
+
+```yaml
+rendering:
+  vanilla-textures:
+    download: true
+    accept-download: true   # you accept the Minecraft EULA: https://www.minecraft.net/eula
+    version: auto           # the server's Minecraft version; or e.g. 26.2, or latest-release
+```
+
+Nothing is downloaded unless both are true. Setting `accept-download` to true means you, the server owner, accept the [Minecraft EULA](https://www.minecraft.net/eula). At the next start or `/snapshot reload` the plugin reads Mojang's version list, downloads the official client jar for your server's Minecraft version (about 40 MB, only over HTTPS from Mojang's own hosts, checked against Mojang's SHA-1) into `plugins/VystormSnapshot/cache/`, keeps only the block textures, block models and blockstates in `plugins/VystormSnapshot/textures.zip` (about 2 MB) and deletes the jar again. The work runs in the background; the console shows the size, the progress and the result. Mojang's textures stay on your server; the plugin sends them nowhere.
+
+The plugin marks the zip it wrote with `textures.source.json` next to it and replaces that zip when the server's Minecraft version changes. A `textures.zip` you put there yourself is never overwritten. If Mojang does not list your server's version, nothing is downloaded and the console says so; set `version` to a listed version or to `latest-release` then. A failed download is tried again a few times (after 30 seconds, 5 and 30 minutes), then again at the next start or `/snapshot reload`. `/snapshot status` shows the state: off, waiting for consent, downloading with percent, done with the version, or the reason it failed. The switch is listed in `/vadmin features` as "Block textures from Mojang".
 
 The renderer samples texture pixels directly, follows model texture inheritance and block-state rotations, and composites tinted layers. Animated textures use their first frame. Multipart models, biome-exact tinting, custom namespaces and client-only displays/shaders are not reproduced. Geometry still follows the server's block collision shapes; decorative model geometry can differ from the client.
 
-With `rendering.player-skins: true` (default), official profile skins are fetched asynchronously and mapped onto a six-part player figure, including skin overlays and slim arms. Pose, armour, capes and held items are not reproduced. A skin that is still loading or unavailable keeps the existing colour fallback. Invisible players and players hidden from the photographer are excluded. Downloads and decoded image sizes are bounded; shutdown closes the loader.
+With `rendering.player-skins: true` (default), official profile skins are fetched asynchronously and mapped onto a six-part player figure, including skin overlays and slim arms. Pose, armour, capes and held items are not reproduced. A skin that is still loading or unavailable keeps the existing colour fallback. Skins are fetched when a player joins and when they are first photographed. When a skin cannot be loaded (no connection to textures.minecraft.net, an error answer, an offline-mode server where players have no official skin), the console names the reason once (the same kind of failure at most once an hour) and the plugin tries again later, after 30 seconds and then less often up to once an hour. `/snapshot reload` asks again for every online player at once. Invisible players and players hidden from the photographer are excluded. Downloads and decoded image sizes are bounded; shutdown closes the loader.
+
+`/snapshot status` (permission `vystormsnapshot.admin`) shows what photos use right now: how many block textures are loaded or where `textures.zip` has to go, and whether player skins are on, how many are cached and the last failure with its reason.
 
 One Minecraft map is always 128×128 pixels. For more detail, choose `2x2` (256×256) or `3x2` (384×256) in the camera menu; administrators can also enable `4x3` or `4x4` in `formats`. Textures improve the content of new photos; they do not change old prints or turn a single map into a high-resolution display. A photo uses one paper per map. With the default left-click shutter, sneak + left-click still takes a selfie; sneak + right-click is reserved for settings.
 
@@ -78,7 +96,7 @@ Show your best photos to the whole server:
 | `/snapshot format WxH` | photo format of the camera in hand |
 | `/snapshot postcard PLAYER [greeting]` | send a copy of the held photo with a short greeting, also to offline players |
 | `/snapshot postcards` | take postcards that did not fit into your inventory |
-| `/snapshot give [player]`, `capture WORLD X Y Z YAW PITCH [WxH]`, `reload` | admin tools |
+| `/snapshot give [player]`, `capture WORLD X Y Z YAW PITCH [WxH]`, `status`, `reload` | admin tools |
 
 ## Permissions
 
@@ -88,15 +106,34 @@ Show your best photos to the whole server:
 | `vystormsnapshot.gallery` | browse the gallery, like photos, show own photos (everyone) |
 | `vystormsnapshot.gallery.moderate` | take any photo down from the gallery (op) |
 | `vystormsnapshot.postcard` | send and collect postcards |
-| `vystormsnapshot.admin` | `/snapshot give`, `capture`, `reload` (op) |
+| `vystormsnapshot.admin` | `/snapshot give`, `capture`, `status`, `reload` (op) |
 
 ## Switches
 
-Every feature has an on/off switch in `config.yml` (all on by default, listed in Vystorm Core's `/vadmin features`, applied without a restart except `tutorial.enabled`): `camera.enabled` (the whole plugin), `camera.craftable`, `film-cost.enabled`, `saved-photos.enabled`, `big-photos.enabled`, `camera-menu.enabled`, `camera.menu-key`, `film-styles.enabled`, `photo-frames.enabled`, `self-timer.enabled`, `telephoto.enabled`, `selfie`, `flash.enabled`, `show-location`, `block-textures.enabled`, `rendering.player-skins`, `album.enabled`, `caption-search.enabled`, `captions.enabled`, `collections.enabled`, `gallery.enabled`, `gallery.prints`, `postcards.enabled`, `contest.enabled`, `admin-photos.enabled`, `tutorial.enabled`. A switched-off feature answers "This feature is switched off on this server."; `/snapshot search` with `album.enabled` off names that switch; photos, albums, captions, collections, the gallery, postcards and contests stay saved.
+Every feature has an on/off switch in `config.yml` (all on by default except `rendering.vanilla-textures.download`, listed in Vystorm Core's `/vadmin features`, applied without a restart except `tutorial.enabled`): `camera.enabled` (the whole plugin), `camera.craftable`, `film-cost.enabled`, `saved-photos.enabled`, `big-photos.enabled`, `camera-menu.enabled`, `camera.menu-key`, `film-styles.enabled`, `photo-frames.enabled`, `self-timer.enabled`, `telephoto.enabled`, `selfie`, `flash.enabled`, `show-location`, `block-textures.enabled`, `rendering.player-skins`, `rendering.vanilla-textures.download` (off by default, also needs `rendering.vanilla-textures.accept-download`), `album.enabled`, `caption-search.enabled`, `captions.enabled`, `collections.enabled`, `gallery.enabled`, `gallery.prints`, `postcards.enabled`, `contest.enabled`, `admin-photos.enabled`, `rankings.enabled`, `tutorial.enabled`. A switched-off feature answers "This feature is switched off on this server."; `/snapshot search` with `album.enabled` off names that switch; photos, albums, captions, collections, the gallery, postcards and contests stay saved.
 
 ## Placeholders
 
 With Vystorm Core 0.65.0 the plugin registers the namespace `snapshot` (server thread; empty while the feature is switched off): `photos`, `gallery_shown`, `gallery_max`, `gallery_likes`, `collections`, `contest_running`, `contest_theme`, `contest_ends_minutes`, `contest_entries`, `camera_cooldown`. Examples: `%vystorm_snapshot_photos%` (photos in the player's album) and `{snapshot:contest_theme}`. `/vadmin placeholders snapshot` lists them.
+
+## Rankings (1.21.0)
+
+With Vystorm Core 0.67.0 or newer the plugin offers two rankings that Vystorm Boards 1.21.0 or newer can show on a board and that every text with Vystorm placeholders can use. Both are counted from the album and the gallery the plugin already saves, so they are complete from the first start and list offline players too. Neither shows where a photo was taken.
+
+| Source id | Counts | Needs |
+| --- | --- | --- |
+| `snapshot:photos` | Photos in the player's album, the same number as `%vystorm_snapshot_photos%` (a big photo counts one per map) | `album.enabled` |
+| `snapshot:likes` | Likes on the photos the player shows in the gallery | `gallery.enabled` |
+
+Placeholders (`<key>` is `photos` or `likes`, `<n>` is 1 to 100): `%vystorm_snapshot_top_<key>_<n>_name%`, `%vystorm_snapshot_top_<key>_<n>_value%`, `%vystorm_snapshot_top_<key>_<n>_raw%`, `%vystorm_snapshot_top_<key>_<n>_uuid%`, and for the viewer `%vystorm_snapshot_rank_<key>%` and `%vystorm_snapshot_value_<key>%`. Short form in Vystorm texts: `{snapshot:top_photos:1:name}`, `{snapshot:rank_likes}`. A board in Vystorm Boards:
+
+```yaml
+elements:
+  - {type: text, text: "<gold>Most photos", x: 16, y: 12, size: 22}
+  - {type: top, source: "snapshot:photos", x: 16, y: 48, rows: 10}
+```
+
+`rankings.enabled: false` removes both rankings at the next `/snapshot reload`. `/vadmin placeholders rankings snapshot` lists them. On a Core older than 0.67.0 the plugin runs as before and offers no rankings; it still needs Vystorm Core 0.66.0 or newer.
 
 ## Configuration
 

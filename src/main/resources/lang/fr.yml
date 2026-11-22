@@ -175,6 +175,10 @@ commands:
           yaw: YAW
           pitch: PITCH
           format: WxH
+      status:
+        name: "status"
+        aliases: []
+        description: "Textures de blocs et skins des joueurs : ce que les photos utilisent en ce moment"
       reload:
         name: reload
         aliases: []
@@ -310,6 +314,7 @@ switches:
   show-location: "Coordonnées et direction sur la photo"
   textures: "Vraies textures de blocs depuis textures.zip"
   skins: "Vrais skins sur les silhouettes de joueurs"
+  vanilla-textures: "Récupérer une fois les textures de blocs chez Mojang (demande rendering.vanilla-textures.accept-download)"
   album: "Album photo avec réimpressions"
   search: "Chercher ses photos par légende"
   captions: "Légendes des photos"
@@ -320,6 +325,7 @@ switches:
   contest: "Concours photo avec votes et récompense"
   admin-photos: "Photos admin depuis n'importe où et appareils offerts"
   tutorial: "Tutoriel dans le menu principal (redémarrage nécessaire)"
+  rankings: "Classements des photos et des j'aime pour Vystorm Boards (Core 0.67.0 ou plus récent)"
 placeholder:
   photos: "Photos dans l'album du joueur"
   gallery_shown: "Photos que le joueur expose dans la galerie"
@@ -349,6 +355,7 @@ switch-names:
   show-location: "Lieu sur la photo"
   textures: "Textures des blocs"
   skins: "Skins des joueurs"
+  vanilla-textures: "Textures de blocs de Mojang"
   album: "Album"
   search: "Recherche par légende"
   captions: "Légendes"
@@ -359,4 +366,31 @@ switch-names:
   contest: "Concours photo"
   admin-photos: "Photos d'administration"
   tutorial: "Tutoriel"
+  rankings: "Classements"
 config-error: "<red>config.yml n'a pas été chargé : erreur YAML à {problem}. Le fichier n'a pas été modifié et les derniers réglages valides restent actifs."
+status:
+  title: "<gold>Statut de Vystorm Snapshot"
+  textures-off: "<gray>Textures de blocs : désactivées (block-textures.enabled: false). Les photos utilisent les couleurs de carte."
+  textures-missing: "<yellow>Textures de blocs : absentes. Les photos utilisent des couleurs de carte unies. Placez un textures.zip dans {path} (assets/minecraft/textures/block, models/block et blockstates d'un jar client Minecraft) puis lancez /snapshot reload. Ou mettez rendering.vanilla-textures.download: true et rendering.vanilla-textures.accept-download: true pour que le plugin les télécharge chez Mojang."
+  textures-loading: "<gray>Textures de blocs : chargement depuis {path} ..."
+  textures-loaded: "<green>Textures de blocs : {count} chargées depuis {path}."
+  textures-failed: "<red>Textures de blocs : {path} n'a pas pu être utilisé ({problem}). {count} textures restent actives."
+  skins-off: "<gray>Skins des joueurs : désactivés (rendering.player-skins: false)."
+  skins-on: "<green>Skins des joueurs : activés, {count} en cache, aucun échec."
+  skins-failure: "<yellow>Skins des joueurs : activés, {count} en cache, {waiting} en attente d'un nouvel essai. Dernier échec il y a {ago} : {problem}"
+  textures-hint: "<yellow>Note pour les admins : cette photo utilise des couleurs de carte unies car les textures de blocs sont absentes. Placez un textures.zip dans {path} puis lancez /snapshot reload. /snapshot status affiche l'état. Ou laissez le plugin les télécharger chez Mojang : rendering.vanilla-textures.download: true et rendering.vanilla-textures.accept-download: true."
+  vanilla-off: "<gray>Téléchargement depuis Mojang : désactivé (rendering.vanilla-textures.download: false)."
+  vanilla-consent: "<yellow>Téléchargement depuis Mojang : en attente de votre accord. rendering.vanilla-textures.download: true est réglé ; rendering.vanilla-textures.accept-download: true accepte le CLUF de Minecraft (https://www.minecraft.net/eula) et laisse le plugin télécharger une fois le jar client."
+  vanilla-own-file: "<gray>Téléchargement depuis Mojang : inutile, {path} est votre propre fichier et n'est jamais remplacé."
+  vanilla-checking: "<gray>Téléchargement depuis Mojang : vérification de la liste des versions de Mojang ..."
+  vanilla-downloading: "<gray>Téléchargement depuis Mojang : Minecraft {version}, {percent} % de {size}."
+  vanilla-done: "<green>Téléchargement depuis Mojang : terminé, textures de Minecraft {version} du {date}."
+  vanilla-failed: "<red>Téléchargement depuis Mojang : échec : {problem}. Pas de nouvel essai avant le prochain démarrage ou /snapshot reload."
+  vanilla-retrying: "<yellow>Téléchargement depuis Mojang : échec : {problem}. Nouvel essai dans {time}."
+rankings:
+  photos:
+    label: "Photos prises"
+    description: "Photos dans l'album du joueur"
+  likes:
+    label: "J'aime de la galerie"
+    description: "J'aime sur les photos que le joueur expose dans la galerie"

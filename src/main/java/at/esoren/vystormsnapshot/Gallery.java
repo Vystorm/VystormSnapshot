@@ -132,6 +132,9 @@ final class Gallery {
 
     Exhibit exhibit(int map) { return exhibits.get(map); }
 
+    /** Every photo on show as a read-only view (server thread; the rankings count it). */
+    Collection<Exhibit> all() { return java.util.Collections.unmodifiableCollection(exhibits.values()); }
+
     boolean shown(int map) { return exhibits.containsKey(map); }
 
     int count(UUID photographer) {

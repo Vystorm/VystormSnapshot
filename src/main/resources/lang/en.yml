@@ -177,6 +177,10 @@ commands:
           yaw: YAW
           pitch: PITCH
           format: WxH
+      status:
+        name: "status"
+        aliases: []
+        description: "Block textures and player skins: what photos use right now"
       reload:
         name: reload
         aliases: []
@@ -313,6 +317,7 @@ switches:
   show-location: "Coordinates and direction on the photo"
   textures: "Real block textures from textures.zip"
   skins: "Real skins on player figures"
+  vanilla-textures: "Fetch the block textures from Mojang once (needs rendering.vanilla-textures.accept-download)"
   album: "Photo album with reprints"
   search: "Search own photos by caption"
   captions: "Captions on photos"
@@ -323,6 +328,7 @@ switches:
   contest: "Photo contests with votes and a reward"
   admin-photos: "Admin photos from any position and camera gifts"
   tutorial: "Tutorial in the main menu (needs a restart)"
+  rankings: "Rankings of photos and likes for Vystorm Boards (Core 0.67.0 or newer)"
 placeholder:
   photos: "Photos in the player's album"
   gallery_shown: "Photos the player shows in the gallery"
@@ -352,6 +358,7 @@ switch-names:
   show-location: "Location on the photo"
   textures: "Block textures"
   skins: "Player skins"
+  vanilla-textures: "Block textures from Mojang"
   album: "Album"
   search: "Caption search"
   captions: "Captions"
@@ -362,4 +369,31 @@ switch-names:
   contest: "Photo contest"
   admin-photos: "Admin photos"
   tutorial: "Tutorial"
+  rankings: "Rankings"
 config-error: "<red>config.yml was not loaded: YAML error at {problem}. The file was left unchanged and the last good settings stay active."
+status:
+  title: "<gold>Vystorm Snapshot status"
+  textures-off: "<gray>Block textures: off (block-textures.enabled: false). Photos use map colours."
+  textures-missing: "<yellow>Block textures: missing. Photos use flat map colours. Put a textures.zip at {path} (assets/minecraft/textures/block, models/block and blockstates from a Minecraft client jar) and run /snapshot reload. Or set rendering.vanilla-textures.download: true and rendering.vanilla-textures.accept-download: true to let the plugin download them from Mojang."
+  textures-loading: "<gray>Block textures: loading from {path} ..."
+  textures-loaded: "<green>Block textures: {count} loaded from {path}."
+  textures-failed: "<red>Block textures: {path} could not be used ({problem}). {count} textures stay active."
+  skins-off: "<gray>Player skins: off (rendering.player-skins: false)."
+  skins-on: "<green>Player skins: on, {count} cached, no failures."
+  skins-failure: "<yellow>Player skins: on, {count} cached, {waiting} waiting for another try. Last failure {ago} ago: {problem}"
+  textures-hint: "<yellow>Admin hint: this photo uses flat map colours because the block textures are missing. Put a textures.zip at {path} and run /snapshot reload. /snapshot status shows the state. Or let the plugin download them from Mojang: rendering.vanilla-textures.download: true and rendering.vanilla-textures.accept-download: true."
+  vanilla-off: "<gray>Download from Mojang: off (rendering.vanilla-textures.download: false)."
+  vanilla-consent: "<yellow>Download from Mojang: waiting for your consent. rendering.vanilla-textures.download: true is set; rendering.vanilla-textures.accept-download: true accepts the Minecraft EULA (https://www.minecraft.net/eula) and lets the plugin download the client jar once."
+  vanilla-own-file: "<gray>Download from Mojang: not needed, {path} is your own file and is never replaced."
+  vanilla-checking: "<gray>Download from Mojang: checking Mojang's version list ..."
+  vanilla-downloading: "<gray>Download from Mojang: Minecraft {version}, {percent} % of {size}."
+  vanilla-done: "<green>Download from Mojang: done, textures of Minecraft {version} from {date}."
+  vanilla-failed: "<red>Download from Mojang: failed: {problem}. No further try until the next start or /snapshot reload."
+  vanilla-retrying: "<yellow>Download from Mojang: failed: {problem}. Next try in {time}."
+rankings:
+  photos:
+    label: "Photos taken"
+    description: "Photos in the player's album"
+  likes:
+    label: "Gallery likes"
+    description: "Likes on the photos the player shows in the gallery"

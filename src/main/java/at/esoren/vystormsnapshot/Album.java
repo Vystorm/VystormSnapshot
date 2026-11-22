@@ -151,6 +151,9 @@ final class Album {
 
     Entry entry(int map) { return entries.get(map); }
 
+    /** Every photo, oldest first, as a read-only view (server thread; the rankings count it). */
+    java.util.Collection<Entry> all() { return java.util.Collections.unmodifiableCollection(entries.values()); }
+
     /** The file name the unreadable album.yml was moved to, or null when the album loaded fine. */
     String broken() { return broken; }
 

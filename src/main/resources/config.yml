@@ -22,12 +22,27 @@ camera:
   menu-key: true
 
 # Server-side photos use the original block textures from a client JAR/resource-pack ZIP.
-# Put your own copy at plugins/VystormSnapshot/textures.zip, then /snapshot reload.
+# Put your own copy at plugins/VystormSnapshot/textures.zip, then /snapshot reload, or let the plugin download it
+# from Mojang with rendering.vanilla-textures below.
 # No Minecraft assets are bundled with the plugin. Missing textures retain map-colour fallback.
 rendering:
   resource-pack: textures.zip
   # Official profile skins are fetched asynchronously, with bounded cache/downloads.
   player-skins: true
+  # Let the plugin build textures.zip itself from Mojang's files. Nothing is ever downloaded unless BOTH keys below
+  # are true. A textures.zip you put there yourself is never touched.
+  vanilla-textures:
+    # true: download the block textures from Mojang when textures.zip is missing, and again when the server's
+    # Minecraft version changes. Also needs accept-download.
+    download: false
+    # Setting this to true means you, the server owner, accept the Minecraft EULA (https://www.minecraft.net/eula).
+    # The plugin then downloads Mojang's client jar for this Minecraft version once to this server (into
+    # plugins/VystormSnapshot/cache/), keeps only the block textures, block models and blockstates in textures.zip,
+    # and deletes the jar again. Mojang's files stay on this server.
+    accept-download: false
+    # auto: the server's own Minecraft version. Or a version from Mojang's list (for example 26.2), or latest-release
+    # for Mojang's newest release. With auto, a version Mojang does not list is reported and nothing is downloaded.
+    version: auto
 # The block textures above. Off: photos use map colours even when textures.zip is there.
 block-textures:
   enabled: true
@@ -151,4 +166,9 @@ admin-photos:
 
 # Tutorial in the Vystorm Core main menu (/vmenu -> Tutorials). Needs a server restart to apply.
 tutorial:
+  enabled: true
+
+# Rankings for Vystorm Boards and placeholders: snapshot:photos (photos in the album) and snapshot:likes (likes on
+# photos shown in the gallery). Needs Vystorm Core 0.67.0 or newer; on an older Core this switch does nothing.
+rankings:
   enabled: true

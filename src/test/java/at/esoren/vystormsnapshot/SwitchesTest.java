@@ -51,11 +51,12 @@ class SwitchesTest {
 
     // ------------------------------------------------------------------ config, descriptions, old configs
 
-    @Test void givenPackagedConfig_whenRead_thenEverySwitchIsOnAndExplained() {
+    @Test void givenPackagedConfig_whenRead_thenEverySwitchIsAtItsDefaultAndExplained() {
         YamlConfiguration config = YamlConfiguration.loadConfiguration(new File("src/main/resources/config.yml"));
+        assertEquals(EnumSet.of(Feature.VANILLA_TEXTURES), Feature.offByDefault(), "only the download from Mojang ships off");
         for (Feature feature : Feature.values()) {
             assertTrue(config.isBoolean(feature.path), feature.path);
-            assertTrue(config.getBoolean(feature.path), feature.path);
+            assertEquals(feature.defaultOn, config.getBoolean(feature.path), feature.path);
             String parent = feature.path.contains(".") ? feature.path.substring(0, feature.path.lastIndexOf('.')) : feature.path;
             assertFalse(config.getComments(feature.path).isEmpty() && config.getComments(parent).isEmpty(), "comment for " + feature.path);
         }
@@ -71,10 +72,13 @@ class SwitchesTest {
         assertEquals("<red>This feature is switched off on this server.", YamlConfiguration.loadConfiguration(new File("src/main/resources/lang/en.yml")).getString("feature-off"));
     }
 
-    @Test void givenAConfigFrom1_18_whenRead_thenEveryFeatureStaysOn() {
+    @Test void givenAConfigFrom1_18_whenRead_thenEveryFeatureStaysOnAndTheDownloadStaysOff() {
         YamlConfiguration old = YamlConfiguration.loadConfiguration(new File("src/test/resources/config-1.18.yml"));
         assertFalse(old.contains("camera.enabled"));
-        assertEquals(Set.of(), Feature.Switches.read(old).off());
+        assertEquals(Set.of(Feature.VANILLA_TEXTURES), Feature.Switches.read(old).off());
+        assertFalse(Feature.Switches.read(old).on(Feature.VANILLA_TEXTURES));
+        assertFalse(SnapshotPlugin.enabled(null, Feature.VANILLA_TEXTURES));
+        assertTrue(SnapshotPlugin.enabled(null, Feature.CAMERA));
     }
 
     @Test void givenAConfigFrom1_18_whenCoreMergesDefaults_thenEveryNewSwitchIsAddedAndOldValuesStay() throws Exception {
@@ -91,8 +95,14 @@ class SwitchesTest {
 
         YamlConfiguration merged = YamlConfiguration.loadConfiguration(data.resolve("config.yml").toFile());
         for (Feature feature : Feature.values()) assertTrue(merged.isBoolean(feature.path), feature.path);
-        assertEquals(Set.of(Feature.SELFIE), Feature.Switches.read(merged).off(), "an existing value is never changed");
+        assertEquals(Set.of(Feature.SELFIE, Feature.VANILLA_TEXTURES), Feature.Switches.read(merged).off(), "an existing value is never changed");
         assertTrue(Files.readString(data.resolve("config.yml")).contains("The whole plugin"), "comments come along");
+        // 1.20.3: both keys of the download from Mojang arrive off, with the EULA comment
+        assertFalse(merged.getBoolean("rendering.vanilla-textures.download", true));
+        assertFalse(merged.getBoolean("rendering.vanilla-textures.accept-download", true));
+        assertTrue(merged.isBoolean("rendering.vanilla-textures.accept-download"));
+        assertEquals("auto", merged.getString("rendering.vanilla-textures.version"));
+        assertTrue(Files.readString(data.resolve("config.yml")).contains("https://www.minecraft.net/eula"), "the EULA comment comes along");
     }
 
     // ------------------------------------------------------------------ fixture
@@ -117,6 +127,7 @@ class SwitchesTest {
         field(snapshot, "switches", Feature.Switches.without(off));
         field(snapshot, "leftClick", true);
         field(snapshot, "lastShot", new HashMap<UUID, Long>());
+        field(snapshot, "textureHinted", java.util.concurrent.ConcurrentHashMap.newKeySet());
         doReturn("VystormSnapshot").when(snapshot).getName();
         doReturn(true).when(snapshot).isEnabled();
         doReturn(new YamlConfiguration()).when(snapshot).getConfig();
@@ -211,7 +222,7 @@ class SwitchesTest {
         assertFalse(tree.children().get("search").visibleTo(null));
         assertTrue(tree.children().get("album").visibleTo(null));
         field(snapshot, "switches", Feature.Switches.without(Feature.CAMERA));
-        for (var sub : tree.children().entrySet()) assertEquals(sub.getKey().equals("reload"), sub.getValue().visibleTo(null), sub.getKey());
+        for (var sub : tree.children().entrySet()) assertEquals(Set.of("reload", "status").contains(sub.getKey()), sub.getValue().visibleTo(null), sub.getKey());
         field(snapshot, "switches", Feature.Switches.without());
         assertTrue(tree.children().values().stream().allMatch(sub -> sub.visibleTo(null)));
     }

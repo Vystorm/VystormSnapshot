@@ -485,6 +485,11 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         return true;
     }
 
+    /** The answer of a command or menu action: the chat line's key and values; ok when something was saved or sent. */
+    record Msg(boolean ok, String key, Object... args) {}
+
+    void send(CommandSender sender, Msg msg) { lang.send(sender, msg.key(), msg.args()); }
+
     /** Captions belong to the album record, so future prints and gallery icons share the same text. */
     void caption(Player player, String text) {
         if (off(player, Feature.CAPTIONS)) return;
@@ -494,15 +499,27 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
             return;
         }
         int map = meta.getMapView().getId();
-        Album.Caption result = album.caption(map, player.getUniqueId(), text, captionMax);
-        if (result != Album.Caption.SAVED) {
-            lang.send(player, "caption-" + result.name().toLowerCase(Locale.ROOT).replace('_', '-'), "max", Integer.toString(captionMax));
-            return;
+        Msg result = caption(player, map, text);
+        if (result.ok()) {
+            core.compat().platform().lore(meta, core.compat().platform().lore(Album.icon(core.compat().platform(), meta.getMapView(), album.entry(map), lang, player)));
+            held.setItemMeta(meta);
         }
-        core.compat().platform().lore(meta, core.compat().platform().lore(Album.icon(core.compat().platform(), meta.getMapView(), album.entry(map), lang, player)));
-        held.setItemMeta(meta);
-        lang.send(player, album.entry(map).caption().isEmpty() ? "caption-cleared" : "caption-saved");
+        send(player, result);
     }
+
+    /** captions.enabled: the caption field of the album menu (1.22.0). */
+    boolean captionsOn() { return on(Feature.CAPTIONS); }
+
+    /** {@code /snapshot caption} for a photo of the album menu (1.22.0): same checks and texts, no held print needed. */
+    Msg caption(Player player, int map, String text) {
+        if (!on(Feature.CAPTIONS)) return new Msg(false, "feature-off");
+        Album.Caption result = album.caption(map, player.getUniqueId(), text, captionMax);
+        if (result != Album.Caption.SAVED)
+            return new Msg(false, "caption-" + result.name().toLowerCase(Locale.ROOT).replace('_', '-'), "max", Integer.toString(captionMax));
+        return new Msg(true, album.entry(map).caption().isEmpty() ? "caption-cleared" : "caption-saved");
+    }
+
+    int captionMax() { return captionMax; }
 
     ItemStack camera(Player forLanguage) {
         ItemStack item = new ItemStack(cameraMaterial);
@@ -638,27 +655,105 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
         if (!(held.getItemMeta() instanceof MapMeta meta) || !meta.hasMapView() || meta.getMapView() == null || album.entry(meta.getMapView().getId()) == null) {
             lang.send(sender, "postcard.no-photo"); return;
         }
+        send(sender, postcard(sender, meta.getMapView().getId(), byName(to), to, greeting));
+    }
+
+    /** A player by the name typed (command, the menu's name prompt); null when the server does not know it. */
+    org.bukkit.OfflinePlayer byName(String name) {
         // Core's platform part: Bukkit.getOfflinePlayerIfCached is Paper API, Spigot has no such method
-        org.bukkit.OfflinePlayer target = to == null ? null : core.compat().platform().getOfflinePlayerIfCached(to);
-        if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) { lang.send(sender, "postcard.unknown", "player", to == null ? "?" : to); return; }
-        if (target.getUniqueId().equals(sender.getUniqueId())) { lang.send(sender, "postcard.self"); return; }
+        return name == null || name.isBlank() ? null : core.compat().platform().getOfflinePlayerIfCached(name.strip());
+    }
+
+    /** A player the menu's player picker chose. */
+    org.bukkit.OfflinePlayer byId(UUID id) { return id == null ? null : Bukkit.getOfflinePlayer(id); }
+
+    /** The postcard button of the album menu: postcards on and the command's permission (1.22.0). */
+    boolean postcardsOn(Player player) { return postcardsEnabled() && player.hasPermission("vystormsnapshot.postcard"); }
+
+    /**
+     * Sends a copy of photo {@code map} as a postcard: the code of {@code /snapshot postcard}, shared by the command
+     * (the held photo) and the album menu (1.22.0). {@code to} is the name for the "unknown player" line.
+     */
+    Msg postcard(Player sender, int map, org.bukkit.OfflinePlayer target, String to, String greeting) {
+        if (!postcardsEnabled()) return new Msg(false, "feature-off");
+        if (album.entry(map) == null) return new Msg(false, "postcard.no-photo");
+        if (target == null || (!target.hasPlayedBefore() && !target.isOnline())) return new Msg(false, "postcard.unknown", "player", to == null ? "?" : to);
+        if (target.getUniqueId().equals(sender.getUniqueId())) return new Msg(false, "postcard.self");
         String text = Postcards.clean(greeting);
-        if (text == null) { lang.send(sender, "postcard.too-long", "max", Postcards.MAX_TEXT); return; }
+        if (text == null) return new Msg(false, "postcard.too-long", "max", Postcards.MAX_TEXT);
         long now = System.currentTimeMillis();
         int perDay = Math.clamp(getConfig().getInt("postcards.per-day", 10), 1, 1000);
-        if (!sender.hasPermission("vystormsnapshot.admin") && !postcards.mayBeSent(sender.getUniqueId(), now, perDay)) { lang.send(sender, "postcard.limit", "max", perDay); return; }
-        Postcards.Card card = new Postcards.Card(meta.getMapView().getId(), sender.getUniqueId(), sender.getName(), text, now);
+        if (!sender.hasPermission("vystormsnapshot.admin") && !postcards.mayBeSent(sender.getUniqueId(), now, perDay)) return new Msg(false, "postcard.limit", "max", perDay);
+        Postcards.Card card = new Postcards.Card(map, sender.getUniqueId(), sender.getName(), text, now);
         Player online = target.getPlayer();
         if (online != null && online.getInventory().firstEmpty() >= 0) {
             deliver(online, card);
         } else {
-            if (!postcards.keep(target.getUniqueId(), card)) { lang.send(sender, "postcard.mailbox-full", "player", target.getName()); return; }
+            if (!postcards.keep(target.getUniqueId(), card)) return new Msg(false, "postcard.mailbox-full", "player", target.getName());
             if (online != null) lang.send(online, "postcard.waiting", "count", postcards.pending(online.getUniqueId()));
             else try { core.message().inbox().send(this, target.getUniqueId(), "postcard.inbox", "player", sender.getName()); }
             catch (RuntimeException noInbox) { getLogger().fine("Inbox unavailable: " + noInbox); }
         }
         postcards.sentBy(sender.getUniqueId(), now);
-        lang.send(sender, "postcard.sent", "player", target.getName() == null ? to : target.getName());
+        return new Msg(true, "postcard.sent", "player", target.getName() == null ? to : target.getName());
+    }
+
+    /** Core's player picker (Core 0.71.0); older Cores ask for the name in a text prompt. */
+    boolean playerPicker() { return CoreApi.has("player-picker"); }
+
+    /**
+     * "Send as postcard" from the album chest (Q on a photo): player through the picker (or a typed name), then the
+     * optional greeting, then {@code back} opens the chest again.
+     */
+    void postcardFromChest(Player player, int map, Runnable back) {
+        Album.Entry photo = album.entry(map);
+        if (!postcardsOn(player) || photo == null || !photo.photographer().equals(player.getUniqueId())) { lang.send(player, "denied"); return; }
+        player.closeInventory();
+        if (playerPicker()) {
+            try { SnapshotPicks.postcardFromChest(core, this, lang, player, map, back); return; }
+            catch (LinkageError olderCore) { getLogger().fine("Player picker not available: " + olderCore); }
+        }
+        postcardByName(player, map, null, back);
+    }
+
+    /** No picker: the name in a Core text prompt; {@code greeting} null = ask for it afterwards too. */
+    void postcardByName(Player player, int map, String greeting, Runnable back) {
+        prompt(player, "panel.postcard-player-prompt", "", "/snapshot postcard PLAYER [TEXT]", name -> {
+            if (name.isBlank()) { back.run(); return; }
+            if (greeting == null) greetingThenSend(player, map, byName(name), name.strip(), back);
+            else { send(player, postcard(player, map, byName(name), name.strip(), greeting)); back.run(); }
+        }, back);
+    }
+
+    /** The optional greeting, then the card goes out and {@code back} runs. */
+    void greetingThenSend(Player player, int map, org.bukkit.OfflinePlayer target, String name, Runnable back) {
+        prompt(player, "panel.postcard-text-prompt", "", "/snapshot postcard PLAYER [TEXT]", text -> {
+            send(player, postcard(player, map, target, name, text));
+            back.run();
+        }, back);
+    }
+
+    /** "Edit caption" from the album chest (Ctrl+Q on a photo): the caption in a text prompt, then the chest again. */
+    void captionFromChest(Player player, int map, Runnable back) {
+        Album.Entry photo = album.entry(map);
+        if (!captionsOn() || photo == null || !photo.photographer().equals(player.getUniqueId())) { lang.send(player, "denied"); return; }
+        player.closeInventory();
+        prompt(player, "panel.caption-prompt", photo.caption(), "/snapshot caption TEXT", text -> {
+            send(player, caption(player, map, text));
+            back.run();
+        }, back);
+    }
+
+    /** A Core text prompt; on Cores that cannot show one the command is named instead. */
+    private void prompt(Player player, String questionKey, String initial, String command, java.util.function.Consumer<String> submit, Runnable cancel) {
+        try {
+            core.dialogs().prompt(this, player, lang.ref("menu-album"), lang.ref(questionKey), initial == null ? "" : initial,
+                    text -> { if (player.isOnline() && isEnabled()) submit.accept(text == null ? "" : text); },
+                    () -> { if (player.isOnline() && isEnabled()) cancel.run(); }, Player::isOnline);
+        } catch (RuntimeException | LinkageError noDialog) {
+            getLogger().fine("Text prompt not available: " + noDialog);
+            lang.send(player, "panel.prompt-failed", "command", command);
+        }
     }
 
     /** {@code /snapshot postcards}: takes waiting postcards into free inventory slots. */
@@ -836,7 +931,7 @@ public final class SnapshotPlugin extends JavaPlugin implements Listener {
     }
 
     void openAlbumChest(Player player, int page, String world, String query) {
-        player.openInventory(album.menu(lang, player, page, galleryOn(player) ? gallery : null, world, query));
+        player.openInventory(album.menu(lang, player, page, galleryOn(player) ? gallery : null, world, query, postcardsOn(player), captionsOn()));
     }
 
     List<String> albumWorlds(Player player) { return album.worlds(player.getUniqueId()); }

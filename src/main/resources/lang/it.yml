@@ -33,6 +33,8 @@ usage-format: '<gray>/snapshot format FORMAT – disponibile: {formats}'
 format-set: <green>Telecamera impostata a {format} ({maps} mappe e tanto carta per foto).
 album-title: Album ({count})
 album-reprint: <yellow>Clicca a sinistra per ristampare (1 carta)
+album-caption-key: "<yellow>Ctrl+Q: modifica la didascalia"
+album-postcard-key: "<yellow>Q: invia come cartolina"
 album-title-page: Album ({count}) · pagina {page}/{pages}
 album-reprint-all: <yellow>Maiusc-click per ristampare l'intero quadro ({maps} carta)
 album-previous: <yellow>« {page}
@@ -272,6 +274,17 @@ panel:
   timer: "Autoscatto"
   print: "Stampa questa mappa"
   print-all: "Stampa la foto intera"
+  caption: "Didascalia"
+  caption-hint: "Compare su ogni stampa di questa foto; vuota la rimuove"
+  postcard: "Invia come cartolina"
+  postcard-text: "Saluto della cartolina"
+  postcard-text-hint: "Facoltativo, al massimo 80 caratteri"
+  postcard-pick-title: "Invia una cartolina a"
+  postcard-pick-subtitle: "Il giocatore riceve una copia di questa foto"
+  postcard-player-prompt: "Chi deve ricevere la cartolina? Scrivi il nome del giocatore."
+  postcard-text-prompt: "Un saluto per la cartolina (facoltativo, al massimo 80 caratteri)."
+  caption-prompt: "Didascalia per questa foto (vuota la rimuove)."
+  prompt-failed: "<gray>Questo server non può mostrare una finestra di testo qui. Usa {command}."
   publish: "Pubblica nella galleria"
   unpublish: "Rimuovi dalla galleria"
   like: "Mi piace"

@@ -1,3 +1,10 @@
+## 1.22.0 — 2026-11-27
+
+- Album menu: the selected photo has a new button **Send as postcard** and a field for an optional greeting. The button opens Vystorm Core's player picker (online, nearby, recent, search) on Core 0.71.0 or newer, sends the card to the player you pick and brings you back to the album with the same photo; with an older Core it asks for the name in a text window. It does what `/snapshot postcard PLAYER [greeting]` does, with the same limits and messages, and you no longer have to hold the photo.
+- The selected photo also has a **Caption** field: what you type is saved for the whole photo, as with `/snapshot caption TEXT`, without holding a print. An empty field removes the caption.
+- In the chest album (Spigot, Paper 1.20.6, screens off) press Q on a photo to send it as a postcard (player picker or name, then the greeting) and Ctrl+Q to edit its caption; the photo lore names both keys. Before, Q on a photo reprinted it like a left-click; with postcards switched off or without `vystormsnapshot.postcard` it still does.
+- The postcard button shows for players with `vystormsnapshot.postcard` while `postcards.enabled` is on, the caption field while `captions.enabled` is on. All commands stay as they were. Still runs with Vystorm Core 0.66.0 or newer; `config.yml` and the data files are unchanged.
+
 ## 1.21.0 — 2026-11-22
 
 - Rankings for boards: with Vystorm Core 0.67.0 or newer and Vystorm Boards 1.21.0 or newer, a board can show the players with the most photos (`snapshot:photos`) and with the most likes in the gallery (`snapshot:likes`), for example `{type: top, source: "snapshot:photos", rows: 10}` with a `text` element above it as the heading. Both rankings are counted from the album and the gallery the plugin already saves, so they are complete from the first start and list offline players too. They never show where a photo was taken.

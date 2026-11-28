@@ -29,6 +29,8 @@ final class SnapshotPanels {
         String selected, world, query, targetName;
         UUID target;
         boolean top;
+        /** The greeting typed for "Send as postcard" in the album (1.22.0); kept until a card is sent. */
+        String greeting = "";
         /**
          * The hotbar slot the player held when this screen opened, -1 if unknown. A Core screen selects an empty slot
          * while it is open (it hides the first-person hand), so clicks must not read the main hand.
@@ -127,7 +129,40 @@ final class SnapshotPanels {
 
     private Panel render(PanelContext ctx, String name) {
         if (!allowed(ctx.player(), name)) return Panel.page(ctx.text(titleKey(name))).child(Ui.text(ctx.text("denied")));
-        return SnapshotPanel.render(ctx, view(ctx, name, state(ctx.player(), name)), (p, action, value) -> run(p, name, action, value));
+        return SnapshotPanel.render(ctx, view(ctx, name, state(ctx.player(), name)), actions(name));
+    }
+
+    /** The screen's handlers; buttons in {@link SnapshotPanel#HAND_OVER} get the panel action. */
+    Actions actions(String name) {
+        return new Actions() {
+            @Override public Result run(Player p, String action, String value) { return SnapshotPanels.this.run(p, name, action, value); }
+            @Override public Result run(PanelAction a, String action, String value) {
+                return action.equals("postcard") && name.equals("album") ? postcard(a, value) : run(a.player(), action, value);
+            }
+        };
+    }
+
+    /**
+     * "Send as postcard" in the album (1.22.0): Core's player picker sends the card with the greeting typed above and
+     * comes back to the album; without the picker the name is asked in a text prompt and the album opens again.
+     */
+    Result postcard(PanelAction a, String value) {
+        Player p = a.player();
+        if (!allowed(p, "album") || !plugin.postcardsOn(p)) return Result.error(lang.plain(p, "denied"));
+        int map;
+        try { map = Integer.parseInt(value); } catch (NumberFormatException invalid) { return Result.error(lang.plain(p, "denied")); }
+        var photo = album.entry(map);
+        if (photo == null || !photo.photographer().equals(p.getUniqueId())) return Result.error(lang.plain(p, "denied"));
+        State s = state(p, "album");
+        String greeting = s.greeting == null ? "" : s.greeting;
+        if (plugin.playerPicker()) {
+            try { return SnapshotPicks.postcard(core, plugin, lang, a, map, greeting, () -> s.greeting = ""); }
+            catch (LinkageError olderCore) { plugin.getLogger().fine("Player picker not available: " + olderCore); }
+        }
+        a.closeAndThen(next -> plugin.postcardByName(next, map, greeting, () -> {
+            if (next.isOnline()) panels.open(next, "album");
+        }));
+        return Result.ok();
     }
 
     View view(PanelContext ctx, String name, State s) {
@@ -158,7 +193,16 @@ final class SnapshotPanels {
                         boolean shown = gallery.shown(album.set(photo.map()).getFirst());
                         buttons.add(button(ctx, "publish", shown ? "panel.unpublish" : "panel.publish", Material.PAINTING, photo.map(), shown, shown, false));
                     }
-                    rows.add(photo(ctx, photo, buttons, ""));
+                    // 1.22.0: caption and postcard without holding the print or typing the command
+                    List<Field> fields = new ArrayList<>();
+                    if (plugin.captionsOn()) fields.add(new Field("caption", ctx.text("panel.caption"), photo.caption(),
+                            Math.clamp(plugin.captionMax(), 1, 200), ctx.text("panel.caption-hint"), "caption:" + photo.map()));
+                    if (plugin.postcardsOn(p)) {
+                        fields.add(new Field("greeting", ctx.text("panel.postcard-text"), s.greeting, Postcards.MAX_TEXT,
+                                ctx.text("panel.postcard-text-hint"), "greeting"));
+                        buttons.add(button(ctx, "postcard", "panel.postcard", Material.WRITABLE_BOOK, photo.map(), false, false, false));
+                    }
+                    rows.add(withFields(photo(ctx, photo, buttons, ""), fields));
                 }
             }
             case "gallery" -> {
@@ -249,6 +293,10 @@ final class SnapshotPanels {
                         new Stat(ctx.text("panel.maps"), Integer.toString(album.set(photo.map()).size()))), buttons);
     }
 
+    private static Row withFields(Row row, List<Field> fields) {
+        return new Row(row.id(), row.title(), row.subtitle(), row.icon(), row.stats(), row.buttons(), List.copyOf(fields));
+    }
+
     private static Button button(PanelContext ctx, String id, String key, Material icon, Object value, boolean danger, boolean confirm, boolean leave) {
         return new Button(id, ctx.text(key), icon, value.toString(), danger, confirm, leave);
     }
@@ -282,6 +330,19 @@ final class SnapshotPanels {
             case "enter-picker" -> { plugin.openContestPicker(p); return Result.ok(); }
             case "back-contest" -> { plugin.openContest(p); return Result.ok(); }
             case "create" -> { collections.prompt(p, "name-prompt", "", text -> { send(p, collections.data.create(p.getUniqueId(), text)); collections.list(p, 0); }); return Result.ok(); }
+            case "greeting" -> {
+                if (!name.equals("album") || !plugin.postcardsOn(p)) return Result.error(lang.plain(p, "denied"));
+                String text = Postcards.clean(value);
+                if (text == null) return Result.error(lang.plain(p, "postcard.too-long", "max", Postcards.MAX_TEXT));
+                s.greeting = text; return Result.ok();
+            }
+        }
+        if (action.startsWith("caption:") && name.equals("album")) {
+            int map;
+            try { map = Integer.parseInt(action.substring("caption:".length())); } catch (NumberFormatException invalid) { return Result.error(lang.plain(p, "denied")); }
+            SnapshotPlugin.Msg msg = plugin.caption(p, map, value);
+            String text = lang.plain(p, msg.key(), msg.args());
+            return msg.ok() ? Result.ok(text) : Result.error(text);
         }
         if (name.equals("collection") || name.equals("sharing")) return collectionAction(p, s, action, value);
         int map;

@@ -71,7 +71,7 @@ One Minecraft map is always 128×128 pixels. For more detail, choose `2x2` (256�
 
 ## Photo captions
 
-Hold one of your photo maps and use `/snapshot caption Our first castle` to attach a permanent caption to the photo in the album. Only its photographer may edit it. Any tile of a big photo updates the whole picture. `/snapshot caption` without text removes the caption.
+Hold one of your photo maps and use `/snapshot caption Our first castle` to attach a permanent caption to the photo in the album. Only its photographer may edit it. Any tile of a big photo updates the whole picture. `/snapshot caption` without text removes the caption. In the album menu the selected photo has a caption field too (in the chest album: Ctrl+Q on a photo), and "Send as postcard" sends it with an optional greeting to a player you choose (in the chest album: Q on a photo).
 
 Captions are stored in `photos/album.yml` and appear in the album, gallery and future reprints. The held print is updated immediately; other existing prints and already open menus keep their old lore until reprinted or reopened. Text is plain text, including Chinese and emoji; formatting codes and control characters are rejected. The default limit is 80 Unicode characters, configurable with `captions.max-length` (1–200). Existing configurations receive this setting automatically; `/snapshot reload` applies changes. Uses `vystormsnapshot.use`.
 

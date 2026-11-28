@@ -8,7 +8,11 @@ import org.bukkit.entity.Player;
 /** Pure, shared layout for Snapshot screens. Services and viewer state live in SnapshotPanels. */
 final class SnapshotPanel {
     record Button(String id, String label, Material icon, String value, boolean danger, boolean confirm, boolean leave) {}
-    record Row(String id, String title, String subtitle, Material icon, List<Stat> stats, List<Button> buttons) {}
+    record Row(String id, String title, String subtitle, Material icon, List<Stat> stats, List<Button> buttons, List<Field> fields) {
+        Row(String id, String title, String subtitle, Material icon, List<Stat> stats, List<Button> buttons) { this(id, title, subtitle, icon, stats, buttons, List.of()); }
+    }
+    /** A text field in the detail of the selected row (1.22.0); a change runs {@code action} with the typed text. */
+    record Field(String id, String label, String value, int maxLength, String hint, String action) {}
     record Stat(String label, String value) {}
     record Option(String id, String label) {}
     /** One camera setting; {@code description} is the line under its name in the settings list. */
@@ -17,7 +21,13 @@ final class SnapshotPanel {
     }
     record View(String title, String subtitle, Material icon, List<Row> rows, String selected,
                 int page, int pages, String search, List<Choice> choices, List<Button> footer) {}
-    interface Actions { Result run(Player player, String action, String value); }
+    interface Actions {
+        Result run(Player player, String action, String value);
+        /** Buttons that hand the player over (picker, prompt) get the panel action itself (1.22.0). */
+        default Result run(PanelAction a, String action, String value) { return run(a.player(), action, value); }
+    }
+    /** Buttons whose handler hands the player over to something else: no refresh after the click. */
+    static final java.util.Set<String> HAND_OVER = java.util.Set.of("postcard");
 
     static Panel render(PanelContext ctx, View view, Actions actions) {
         Panel panel = Panel.page(view.title()).subtitle(view.subtitle()).icon(Ui.item(view.icon()))
@@ -45,6 +55,8 @@ final class SnapshotPanel {
             Ui.Kv stats = Ui.kv().id("details");
             for (Stat stat : chosen.stats()) stats.row(stat.label(), stat.value());
             detail.child(stats);
+            for (Field field : chosen.fields()) detail.child(Ui.input(field.id(), field.label()).value(field.value()).maxLength(field.maxLength())
+                    .placeholder(field.hint()).tooltip(field.hint()).onChange((a, value) -> change(a, actions, field.action(), value)));
             for (Button button : chosen.buttons()) detail.child(button(ctx, button, actions));
             panel.child(Ui.row().gap(8).children(list, detail));
         }
@@ -65,6 +77,7 @@ final class SnapshotPanel {
         if (spec.confirm()) button.confirm(spec.label(), ctx.text(spec.id().equals("delete") ? "collections.delete-confirm"
                 : spec.id().startsWith("print") ? "panel.print-confirm" : "panel.confirm"));
         return button.onClick(a -> {
+            if (HAND_OVER.contains(spec.id())) return actions.run(a, spec.id(), spec.value());
             if (spec.leave()) { a.closeAndThen(p -> actions.run(p, spec.id(), spec.value())); return Result.ok(); }
             return change(a, actions, spec.id(), spec.value());
         });

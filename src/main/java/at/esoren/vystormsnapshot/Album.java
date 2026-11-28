@@ -238,6 +238,14 @@ final class Album {
     }
 
     Inventory menu(Lang lang, Player player, int page, Gallery gallery, String world, String query) {
+        return menu(lang, player, page, gallery, world, query, false, false);
+    }
+
+    /**
+     * {@code postcards}: the player may send postcards (Q on a photo); {@code captions}: captions are on (Ctrl+Q edits
+     * the caption). Both 1.22.0; off, the photo lore is as before.
+     */
+    Inventory menu(Lang lang, Player player, int page, Gallery gallery, String world, String query, boolean postcards, boolean captions) {
         Holder holder = new Holder();
         holder.world = world;
         holder.query = query;
@@ -263,8 +271,9 @@ final class Album {
             int maps = set(entry, entries::get).size();
             platform.editMeta(icon, meta -> {
                 List<Component> lore = platform.lore(meta) == null ? new ArrayList<>() : new ArrayList<>(platform.lore(meta));
-                lore.add(lang.component(player, "album-caption-hint").decoration(TextDecoration.ITALIC, false));
+                lore.add(lang.component(player, captions ? "album-caption-key" : "album-caption-hint").decoration(TextDecoration.ITALIC, false));
                 lore.add(lang.component(player, "album-reprint").decoration(TextDecoration.ITALIC, false));
+                if (postcards) lore.add(lang.component(player, "album-postcard-key").decoration(TextDecoration.ITALIC, false));
                 if (maps > 1) lore.add(lang.component(player, "album-reprint-all", "maps", Integer.toString(maps)).decoration(TextDecoration.ITALIC, false));
                 if (gallery != null) {
                     Gallery.Exhibit exhibit = gallery.exhibit(set(entry.map()).getFirst());
@@ -317,6 +326,17 @@ final class Album {
             event.setCancelled(true);
             if (event.getClickedInventory() != inventories.top(event.getView()) || !(event.getWhoClicked() instanceof Player player)) return;
             int slot = event.getSlot();
+            // 1.22.0: Q sends the photo as a postcard, Ctrl+Q edits its caption (each only while it is offered), one tick later
+            if (slot >= 0 && slot < holder.maps.size() && event.getClick() == org.bukkit.event.inventory.ClickType.DROP && plugin.postcardsOn(player)) {
+                int map = holder.maps.get(slot), page = holder.page;
+                Bukkit.getScheduler().runTask(plugin, () -> plugin.postcardFromChest(player, map, () -> holder.reopen(plugin, player, page)));
+                return;
+            }
+            if (slot >= 0 && slot < holder.maps.size() && event.getClick() == org.bukkit.event.inventory.ClickType.CONTROL_DROP && plugin.captionsOn()) {
+                int map = holder.maps.get(slot), page = holder.page;
+                Bukkit.getScheduler().runTask(plugin, () -> plugin.captionFromChest(player, map, () -> holder.reopen(plugin, player, page)));
+                return;
+            }
             if (slot >= 0 && slot < holder.maps.size() && event.isRightClick() && !event.isShiftClick() && plugin.galleryOn(player)) {
                 plugin.togglePublish(player, holder.maps.get(slot));
                 holder.reopen(plugin, player, holder.page);

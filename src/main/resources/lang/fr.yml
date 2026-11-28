@@ -33,6 +33,8 @@ usage-format: '<gray>/snapshot format FORMAT – disponibles: {formats}'
 format-set: <green>Caméra réglée à {format} (cartes {maps} et autant de papier par photo).
 album-title: Album ({count})
 album-reprint: <yellow>Cliquez sur la gauche pour réimprimer (1 papier)
+album-caption-key: "<yellow>Ctrl+Q : modifier la légende"
+album-postcard-key: "<yellow>Q : envoyer comme carte postale"
 album-title-page: Album ({count}) · page {page}/{pages}
 album-reprint-all: <yellow>Cliquez-dessus pour réimprimer l'ensemble de l'image ({maps} papier)
 album-previous: <yellow>« Page {page}
@@ -272,6 +274,17 @@ panel:
   timer: "Retardateur"
   print: "Imprimer cette carte"
   print-all: "Imprimer la photo entière"
+  caption: "Légende"
+  caption-hint: "Affichée sur chaque tirage de cette photo ; vide la supprime"
+  postcard: "Envoyer en carte postale"
+  postcard-text: "Message de la carte"
+  postcard-text-hint: "Facultatif, 80 caractères au plus"
+  postcard-pick-title: "Envoyer une carte postale à"
+  postcard-pick-subtitle: "Le joueur reçoit une copie de cette photo"
+  postcard-player-prompt: "Qui doit recevoir la carte postale ? Écris le nom du joueur."
+  postcard-text-prompt: "Un message pour la carte postale (facultatif, 80 caractères au plus)."
+  caption-prompt: "Légende de cette photo (vide la supprime)."
+  prompt-failed: "<gray>Ce serveur ne peut pas afficher de fenêtre de texte ici. Utilise {command}."
   publish: "Publier dans la galerie"
   unpublish: "Retirer de la galerie"
   like: "J’aime"

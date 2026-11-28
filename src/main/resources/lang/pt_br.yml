@@ -33,6 +33,8 @@ usage-format: '<gray>/snapshot format FORMAT – disponível: {formats}'
 format-set: <green>Câmera configurada para {format} ({maps} mapas e tanto papel por foto).
 album-title: Álbum ({count})
 album-reprint: <yellow>Clique com o botão esquerdo para reimprimir (1 papel)
+album-caption-key: "<yellow>Ctrl+Q: editar a legenda"
+album-postcard-key: "<yellow>Q: enviar como cartão-postal"
 album-title-page: Álbum ({count}) · Página {page}/{pages}
 album-reprint-all: <yellow>Shift-clique para reimprimir a imagem inteira ({maps} papel)
 album-previous: <yellow>« Página {page}
@@ -272,6 +274,17 @@ panel:
   timer: "Temporizador"
   print: "Imprimir este mapa"
   print-all: "Imprimir a foto inteira"
+  caption: "Legenda"
+  caption-hint: "Aparece em cada impressão desta foto; vazia a remove"
+  postcard: "Enviar como cartão-postal"
+  postcard-text: "Mensagem do cartão"
+  postcard-text-hint: "Opcional, no máximo 80 caracteres"
+  postcard-pick-title: "Enviar um cartão-postal para"
+  postcard-pick-subtitle: "O jogador recebe uma cópia desta foto"
+  postcard-player-prompt: "Quem deve receber o cartão-postal? Digite o nome do jogador."
+  postcard-text-prompt: "Uma mensagem para o cartão-postal (opcional, no máximo 80 caracteres)."
+  caption-prompt: "Legenda desta foto (vazia a remove)."
+  prompt-failed: "<gray>Este servidor não pode mostrar uma janela de texto aqui. Use {command}."
   publish: "Publicar na galeria"
   unpublish: "Retirar da galeria"
   like: "Curtir"

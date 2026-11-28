@@ -33,6 +33,8 @@ usage-format: '<gray>/snapshot format FORMAT – доступный: {formats}'
 format-set: <green>Камера установлена на {format} ({maps} карты и столько же бумаги на фото).
 album-title: Альбом ({count})
 album-reprint: <yellow>Левый клик для перепечатки (1 бумаг)
+album-caption-key: "<yellow>Ctrl+Q: изменить подпись"
+album-postcard-key: "<yellow>Q: отправить открыткой"
 album-title-page: Альбом ({count}) · страница {page}/{pages}
 album-reprint-all: <yellow>Shift-click для перепечатки всей картины ({maps})
 album-previous: <yellow>« Страница {page}
@@ -272,6 +274,17 @@ panel:
   timer: "Автоспуск"
   print: "Напечатать эту карту"
   print-all: "Напечатать всё фото"
+  caption: "Подпись"
+  caption-hint: "Видна на каждой печати этого фото; пустая удаляет её"
+  postcard: "Отправить открыткой"
+  postcard-text: "Привет на открытке"
+  postcard-text-hint: "Необязательно, не более 80 символов"
+  postcard-pick-title: "Отправить открытку"
+  postcard-pick-subtitle: "Игрок получит копию этого фото"
+  postcard-player-prompt: "Кто получит открытку? Введите имя игрока."
+  postcard-text-prompt: "Привет для открытки (необязательно, не более 80 символов)."
+  caption-prompt: "Подпись к этому фото (пустая удаляет её)."
+  prompt-failed: "<gray>Этот сервер не может показать здесь текстовое окно. Используйте {command}."
   publish: "Опубликовать в галерее"
   unpublish: "Убрать из галереи"
   like: "Нравится"
